@@ -28,7 +28,7 @@ class UserDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT  (SELECT username FROM users WHERE username=%s) = %s", (username, username))
+                cur.execute("SELECT (SELECT username FROM users WHERE username=%s) = %s", (username, username))
                 check = cur.fetchone()
                 return check[0]
 
@@ -37,7 +37,7 @@ class UserDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT  (SELECT username FROM users WHERE email=%s) = %s", (email, email))
+                cur.execute("SELECT (SELECT email FROM users WHERE email=%s) = %s", (email, email))
                 check = cur.fetchone()
                 return check[0]
 
