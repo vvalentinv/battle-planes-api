@@ -40,4 +40,26 @@ class UserDao:
                 cur.execute("SELECT  (SELECT username FROM users WHERE email=%s) = %s", (email, email))
                 check = cur.fetchone()
                 return check[0]
+
+    def get_user_by_username(self, username):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM users WHERE username = %s", (username,))
+                user = cur.fetchone()
+                if user:
+                    return User(user[0], user[1], user[2], user[3])
+                return None
+
+    def update_email(self, username, email):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE users SET email=%s WHERE username=%s RETURNING *", (email, username))
+                updated_user = cur.fetchone()
+                if updated_user:
+                    return "Email successfully updated!"
+                return None
     
