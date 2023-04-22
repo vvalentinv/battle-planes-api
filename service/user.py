@@ -7,9 +7,11 @@ class UserService:
         self.user_dao = UserDao()
 
     def add_user(self, user):
-        if self.user_dao.get_user_by_username(user.username):
+        if self.user_dao.check_for_username(user.get_username()):
             raise Forbidden("This username is already in use! Please try again.")
-        if self.user_dao.get_user_by_email(user.email):
+        if self.user_dao.check_for_email(user.get_email()):
             raise Forbidden("This email is already in use! Please sign into your existing account.")
-        added_user_obj = self.user_dao.add_user(user)
-        return added_user_obj.to_dict()
+        return self.user_dao.add_user(user)
+
+
+
