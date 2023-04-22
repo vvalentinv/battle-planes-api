@@ -1,5 +1,6 @@
 from dao.user import UserDao
 from exception.forbidden import Forbidden
+from utilities.helper import validate_password
 
 
 class UserService:
@@ -16,7 +17,8 @@ class UserService:
 
     def update_email(self, username, password, email):
         # TO DO validate email, password values
-        # TO DO check password
+        if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
+            raise Forbidden("Invalid password for this account!")
         return self.user_dao.update_email(username, email)
 
 

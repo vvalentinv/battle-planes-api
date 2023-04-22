@@ -37,3 +37,4 @@ def update_email(username):
         return {"message": str(e)}, 400
     except Forbidden as e:
         return {"message": str(e)}, 400
+
