@@ -1,4 +1,4 @@
-class User:
+class Plane:
     def __init__(self, plane_id, cockpit, flight_direction, body, sky_size):
         self.__plane_id = plane_id
         self.__cockpit = cockpit
