@@ -73,3 +73,61 @@ def validate_username(string):
         raise InvalidParameter("Usernames must have at least 4 alphanumeric characters")
 
     return True
+
+
+def build_plane(cockpit, sky_size, flight_direction):
+    plane = ()
+    plane += cockpit
+    if flight_direction == 'N':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i + sky_size)
+        # Add body
+        plane += cockpit + (2 * sky_size)
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i + (3 * sky_size))
+    if flight_direction == 'W':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i * sky_size) + 1
+        # Add body
+        plane += cockpit + 2
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i * sky_size) + 3
+    if flight_direction == 'E':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i * sky_size) - 1
+        # Add body
+        plane += cockpit - 2
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i * sky_size) - 3
+    if flight_direction == 'S':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit - (i + sky_size)
+        # Add body
+        plane += cockpit - (2 * sky_size)
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit - (i + (3 * sky_size))
+    return plane
+
+
+def build_all_planes_for_sky_size(sky_size, plane_length, wings_size):
+    planes = set()
+    for c in range(0, sky_size * sky_size):
+        while wings_size - 1 < c % sky_size < sky_size - wings_size and c < sky_size * (sky_size - (plane_length - 1)):
+            planes.add(build_plane(c, sky_size, 'N'))
+        while wings_size - 1 < c % sky_size < sky_size - wings_size and c > sky_size * (plane_length - 1):
+            planes.add(build_plane(c, sky_size, 'S'))
+        while 0 <= c % sky_size < sky_size - (plane_length - 1) and \
+                wings_size - 1 < c < sky_size * (sky_size - wings_size):
+            planes.add(build_plane(c, sky_size, 'W'))
+        while plane_length - 1 <= c % sky_size < sky_size and \
+                wings_size * sky_size < c < sky_size * (sky_size - wings_size):
+            planes.add(build_plane(c, sky_size, 'E'))
+    return planes
