@@ -73,3 +73,45 @@ def validate_username(string):
         raise InvalidParameter("Usernames must have at least 4 alphanumeric characters")
 
     return True
+
+
+def build_plane(cockpit, sky_size, flight_direction):
+    plane = ()
+    plane += cockpit
+    if flight_direction == 'N':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i + sky_size)
+        # Add body
+        plane += cockpit + (2 * sky_size)
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i + (3 * sky_size))
+    if flight_direction == 'W':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i * sky_size) + 1
+        # Add body
+        plane += cockpit + 2
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i * sky_size) + 3
+    if flight_direction == 'E':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit + (i * sky_size) - 1
+        # Add body
+        plane += cockpit - 2
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit + (i * sky_size) - 3
+    if flight_direction == 'S':
+        # Add wings
+        for i in range(-2, 3, 1):
+            plane += cockpit - (i + sky_size)
+        # Add body
+        plane += cockpit - (2 * sky_size)
+        # Add tail
+        for i in range(-1, 2, 1):
+            plane += cockpit - (i + (3 * sky_size))
+    return plane
