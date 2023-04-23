@@ -6,7 +6,6 @@ import psycopg2
 
 
 load_dotenv()
-os.getenv("ACCESS_KEY")
 
 
 class UserDao:
