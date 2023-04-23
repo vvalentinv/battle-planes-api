@@ -117,17 +117,26 @@ def build_plane(cockpit, sky_size, flight_direction):
     return plane
 
 
+def build_plane_data(plane, sky_size, flight_direction):
+    plane_data = ()
+    plane_data += plane
+    plane_data += sky_size
+    plane_data += flight_direction
+    return plane_data
+
+
 def build_all_planes_for_sky_size(sky_size, plane_length, wings_size):
-    planes = set()
+    planes_data = set()
     for c in range(0, sky_size * sky_size):
         while wings_size - 1 < c % sky_size < sky_size - wings_size and c < sky_size * (sky_size - (plane_length - 1)):
-            planes.add(build_plane(c, sky_size, 'N'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'N'), sky_size, 'N'))
         while wings_size - 1 < c % sky_size < sky_size - wings_size and c > sky_size * (plane_length - 1):
-            planes.add(build_plane(c, sky_size, 'S'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'S'), sky_size, 'S'))
         while 0 <= c % sky_size < sky_size - (plane_length - 1) and \
                 wings_size - 1 < c < sky_size * (sky_size - wings_size):
-            planes.add(build_plane(c, sky_size, 'W'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'W'), sky_size, 'W'))
         while plane_length - 1 <= c % sky_size < sky_size and \
                 wings_size * sky_size < c < sky_size * (sky_size - wings_size):
-            planes.add(build_plane(c, sky_size, 'E'))
-    return planes
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'E'), sky_size, 'E'))
+    return planes_data
+
