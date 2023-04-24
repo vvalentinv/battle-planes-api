@@ -7,4 +7,5 @@ load_dotenv()
 
 
 class BattleDao:
-    pass
+    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array, username):
+        pass
