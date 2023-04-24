@@ -137,3 +137,23 @@ def build_all_planes_for_sky_size(sky_size, plane_length, wings_size):
             planes_data.add(build_plane_data(build_plane(c, sky_size, 'E'), sky_size, 'E'))
     return planes_data
 
+
+def validate_int(number):
+    reg_invalid_character = r"[^0-9]"
+    number = str(number)
+    if re.findall(reg_invalid_character, number):
+        raise InvalidParameter("Expected digits only")
+    return True
+
+
+def validate_flight_direction(one_char):
+    if one_char not in {'N', 'E', 'S', 'W'}:
+        raise InvalidParameter("Expected one of N, E, S, or W")
+    return True
+
+
+
+
+
+
+
