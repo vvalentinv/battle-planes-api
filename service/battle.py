@@ -11,13 +11,12 @@ class BattleService:
         self.plane_dao = PlaneDao()
         self.user_dao = UserDao()
 
-    def add_plane_to_battle_defense_by_username(self, battle_id, cockpit, flight_direction, sky_size):
+    def add_plane_to_battle_defense_by_username(self, battle_id, username, cockpit, flight_direction, sky_size):
         # TO DO check if logged-in user is one of battle users
         # TO DO bring username as param
         if validate_int(battle_id) and validate_int(cockpit) and validate_flight_direction(flight_direction) \
                 and validate_int(sky_size) and 9 < sky_size < 16:
             plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
-            username = None
             plane_ids = None
             if plane_id is not None:
                 position = self.battle_dao.get_defense_position(battle_id, username)
