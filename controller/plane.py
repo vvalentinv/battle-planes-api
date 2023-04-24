@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint
 from utilities.helper import build_all_planes_for_sky_size
 from service.plane import PlaneService
 
