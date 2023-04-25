@@ -1,0 +1,2 @@
+class BusyPlayer(Exception):
+    pass
