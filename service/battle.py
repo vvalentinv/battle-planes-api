@@ -1,6 +1,7 @@
 from dao.battle import BattleDao
 from dao.plane import PlaneDao
 from dao.user import UserDao
+from exception.busy_player import BusyPlayer
 from utilities.helper import validate_int, validate_flight_direction, validate_username
 from exception.invalid_parameter import InvalidParameter
 
@@ -26,13 +27,13 @@ class BattleService:
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
-    def add_new_battle(self, user_id, opponent):
+    def add_new_battle(self, username, opponent):
         opponent_user = None
         if validate_username(opponent):
             opponent_user = self.user_dao.get_user_by_username(opponent)
         elif self.battle_dao.check_if_user_is_battle_ready:
-            return f"{opponent} has already engaged in battle!"
-        return self.battle_dao.add_battle(user_id, opponent_user.get_user_id())
+            raise BusyPlayer(f"{opponent} has already engaged in battle!")
+        return self.battle_dao.add_battle(self.user_dao.get_user_by_username(username), opponent_user)
 
 
 
