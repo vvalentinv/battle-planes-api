@@ -19,5 +19,14 @@ class BattleDao:
     def get_defense_by_id_username_and_position(self, battle_id, username, position):
         pass
 
-    def add_battle(self, user_id, opponent_id):
-        pass
+    def add_battle(self, user, opponent):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO battles (challenger_id, challenged_id) "
+                            "VALUES (%s, %s)", (user.get_user_id(), opponent.get_user_id()))
+                inserted_user = cur.fetchone()
+                if inserted_user:
+                    return "Challenge accepted!"
+                return None
