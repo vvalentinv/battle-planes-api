@@ -126,14 +126,34 @@ def build_all_planes_for_sky_size(sky_size, plane_length, wings_size):
     planes_data = set()
     for c in range(0, sky_size * sky_size):
         if wings_size - 1 < c % sky_size < sky_size - wings_size and c < sky_size * (sky_size - (plane_length - 1)):
-            planes_data.add(build_plane_data(build_plane(c, sky_size, 'N'), sky_size, 'N'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'N'), sky_size, 1))
         if wings_size - 1 < c % sky_size < sky_size - wings_size and c > sky_size * (plane_length - 1):
-            planes_data.add(build_plane_data(build_plane(c, sky_size, 'S'), sky_size, 'S'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'S'), sky_size, 3))
         if 0 <= c % sky_size < sky_size - (plane_length - 1) and \
                 wings_size * sky_size <= c < sky_size * (sky_size - wings_size):
-            planes_data.add(build_plane_data(build_plane(c, sky_size, 'W'), sky_size, 'W'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'W'), sky_size, 4))
         if plane_length - 1 <= c % sky_size < sky_size and \
                 wings_size * sky_size + plane_length - 1 <= c < sky_size * (sky_size - wings_size):
-            planes_data.add(build_plane_data(build_plane(c, sky_size, 'E'), sky_size, 'E'))
+            planes_data.add(build_plane_data(build_plane(c, sky_size, 'E'), sky_size, 2))
     return planes_data
+
+
+def validate_int(number):
+    reg_invalid_character = r"[^0-9]"
+    number = str(number)
+    if re.findall(reg_invalid_character, number):
+        raise InvalidParameter("Expected digits only")
+    return True
+
+
+def validate_flight_direction(direction):
+    if direction not in {1, 2, 3, 4}:
+        raise InvalidParameter("Expected one of 1, 2, 3, or 4")
+    return True
+
+
+
+
+
+
 
