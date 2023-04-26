@@ -27,13 +27,14 @@ class BattleService:
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
-    def add_new_battle(self, username, opponent):
-        opponent_user = None
-        if validate_username(opponent):
-            opponent_user = self.user_dao.get_user_by_username(opponent)
-        elif self.battle_dao.check_if_user_is_battle_ready:
-            raise BusyPlayer(f"{opponent} has already engaged in battle!")
-        return self.battle_dao.add_battle(self.user_dao.get_user_by_username(username), opponent_user)
+    def start_battle_by_challenger(self, username, battle_id):
+        battle_ready = self.battle_dao.get_battle_by_id(battle_id)
+        if battle_ready is None:
+            raise InvalidParameter("Request rejected")
+        if battle_ready and battle_ready.get_challenger_id() > 0:
+            raise BusyPlayer(f"{battle_ready.get_challenged_id()} has already engaged in battle!")
+        return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id,
+                                                        battle_ready.get_defense_size())
 
 
 

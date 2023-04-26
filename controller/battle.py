@@ -25,14 +25,13 @@ def add_plane_to_battle_defense_by_username(battle_id, username):
         return {"message": str(e)}, 403
 
 
-@bc.route('/battles', methods=['POST'])
-def add_battle_by_username():
+@bc.route('/battles/<battle_id>', methods=['PUT'])
+def start_battle_by_challenger(battle_id):
     r_body = request.get_json()
     # TO DO get user_id from read-only cookie and pass it as param to service layer
     username = None
     try:
-        opponent = r_body.get('opponent', None)
-        return {"message": battle_service.add_new_battle(username, opponent)}, 201
+        return {"message": battle_service.start_battle_by_challenger(username, battle_id)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
