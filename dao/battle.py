@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
 import os
-from model.user import User
+from model.battle import Battle
 import psycopg2
 
 load_dotenv()
@@ -31,4 +31,18 @@ class BattleDao:
                 return None
 
     def get_battle_by_id(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
+                b = cur.fetchone()
+                if b:
+                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
+                return None
+
+    def check_challenger_id(self, battle_id, param):
+        pass
+
+    def add_battle(self, battle):
         pass
