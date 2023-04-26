@@ -16,8 +16,9 @@ def add_user():
         username = r_body.get('username', None)
         password = r_body.get('password', None)
         email = r_body.get('email', None)
-        added_user = user_service.add_user(User(None, username, password, email))
-        return {"message": added_user}, 201
+        if username and password and email:
+            added_user = user_service.add_user(User(None, username, password, email))
+            return {"message": added_user}, 201
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
