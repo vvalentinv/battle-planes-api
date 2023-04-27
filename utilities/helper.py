@@ -153,7 +153,7 @@ def validate_flight_direction(direction):
 
 
 def validate_array_of_ints(defense):
-    for num in defense.split(','):
+    for num in defense:
         validate_int(num)
     return True
 

@@ -1,5 +1,4 @@
 from flask import Blueprint, request
-from model.battle import Battle
 from exception.busy_player import BusyPlayer
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
@@ -13,7 +12,7 @@ battle_service = BattleService()
 def add_battle():
     r_body = request.get_json()
     # TO DO get username from read-only cookie and pass it as param to service layer
-    username = None
+    username = "jcad1"  # "default-challenger"
     try:
         defense = r_body.get('defense', None)
         defense_size = r_body.get('defense_size', None)
