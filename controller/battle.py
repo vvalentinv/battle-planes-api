@@ -45,7 +45,7 @@ def add_plane_to_battle_defense_by_username(battle_id):
 @bc.route('/battles/<battle_id>', methods=['PUT'])
 def start_battle_by_challenger(battle_id):
     # TO DO get user_id from read-only cookie and pass it as param to service layer
-    username = None
+    username = "jcad2"
     try:
         return {"message": battle_service.start_battle_by_challenger(username, battle_id)}, 200
     except InvalidParameter as e:
