@@ -30,7 +30,7 @@ class BattleService:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
     def start_battle_by_challenger(self, username, battle_id):
-        if not self.battle_dao.check_is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
+        if self.battle_dao.is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
             raise BusyPlayer("You are already engaged in another battle")
         if validate_int(battle_id):
             pass
@@ -40,14 +40,15 @@ class BattleService:
         if battle and battle.get_challenger_id() > 0:
             raise BusyPlayer(f"{self.user_dao.get_user_by_username(battle.get_challenged_id())} "
                              f"has already engaged in battle!")
-        elif battle.get_challenged_id() is not self.user_dao.get_user_by_username(username).get_user_id():
+        if battle.get_challenged_id() == self.user_dao.get_user_by_username(username).get_user_id():
             raise InvalidParameter("Players cannot challenge themselves")
-        return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id)
+        return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id,
+                                                        battle.get_defense_size() )
 
     def add_battle(self, username, defense, defense_size, sky_size):
         if validate_int(defense_size) and validate_int(sky_size) and validate_array_of_ints(defense):
             pass
-        if self.battle_dao.check_is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
+        if self.battle_dao.is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
             raise Forbidden("You are already engaged in another battle")
         battle = Battle(None, None, self.user_dao.get_user_by_username(username).get_user_id(),
                         None, defense, sky_size, None, None, None, None, defense_size, None)
