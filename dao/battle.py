@@ -45,16 +45,28 @@ class BattleDao:
         pass
 
     def add_battle(self, battle):
-        pass
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) VALUES	"
+                            "(0, %s, %s, False, Now()) returning *",
+                            (battle.get_challenged_id(), battle.get_challenged_defense()))
+                b = cur.fetchone()
+                if b:
+                    return "You have set your defense and waiting for a challenger!"
+                return None
 
     def check_is_engaged(self, user_id):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT (SELECT * FROM battles WHERE concluded IS False AND "
-                            "(challenger_id = %s OR challenged_id = %s) ) = %s", (user_id,))
+                cur.execute("SELECT (SELECT challenger_id FROM battles "
+                            "WHERE concluded IS False AND challenger_id = %s "
+                            "UNION "
+                            "       SELECT challenged_id FROM battles WHERE concluded IS False AND challenged_id = %s )"
+                            " = %s", (user_id, user_id, user_id))
                 found = cur.fetchone()
-                if found:
-                    return found[0]
-                return None
+
+                return found[0]
