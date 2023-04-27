@@ -41,7 +41,7 @@ class Plane:
             'plane_id': self.get_plane_id(),
             'cockpit': self.get_cockpit(),
             'flight_direction': self.get_flight_direction(),
-            'email': self.get_body(),
+            'body': self.get_body(),
             'sky_size': self.get_sky_size()
         }
 

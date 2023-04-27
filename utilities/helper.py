@@ -142,13 +142,19 @@ def validate_int(number):
     reg_invalid_character = r"[^0-9]"
     number = str(number)
     if re.findall(reg_invalid_character, number):
-        raise InvalidParameter("Expected digits only")
+        raise InvalidParameter("Expected digits only in a number")
     return True
 
 
 def validate_flight_direction(direction):
     if direction not in {1, 2, 3, 4}:
         raise InvalidParameter("Expected one of 1, 2, 3, or 4")
+    return True
+
+
+def validate_array_of_ints(defense):
+    for num in defense.split(','):
+        validate_int(num)
     return True
 
 
