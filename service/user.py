@@ -24,11 +24,11 @@ class UserService:
             if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
                 raise Forbidden("Invalid password for this account!")
             return self.user_dao.update_email(username, email)
-        if validate_password_value(n_pwd):
+        elif validate_password_value(n_pwd):
             pass
-        if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
-            raise Forbidden("Invalid password for this account!")
-        return self.user_dao.update_password(username, n_pwd)
+            if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
+                raise Forbidden("Invalid password for this account!")
+            return self.user_dao.update_password(username, n_pwd)
 
 
 
