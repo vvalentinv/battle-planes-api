@@ -28,10 +28,11 @@ class BattleService:
                     old_def_size = len(plane_ids)
                     plane_ids.add(plane_id)
                     if len(plane_ids) > old_def_size:
-                        def_till_complete = b.get_defense_size() - len(plane_ids)
-                        if def_till_complete >= 0:
-                            return self.battle_dao.add_plane_to_battle_defense_by_username(
-                                battle_id, list(plane_ids), def_till_complete)
+                        if b.get_defense_size() - len(plane_ids) >= 0 \
+                                and self.battle_dao.is_time_left(b.get_battle_id()):
+                            return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, list(plane_ids))
+                        elif not self.battle_dao.is_time_left(b.get_battle_id()):
+                            return "Time frame to add planes for defense setup elapsed."
                         else:
                             return "Maximum defense size reached."
                     else:

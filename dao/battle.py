@@ -8,14 +8,13 @@ load_dotenv()
 
 class BattleDao:
 
-    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array, def_till_complete):
+    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_defense=%s, battle_turn = Now() + "
-                            "'%s MINUTE' WHERE id=%s RETURNING *"
-                            , (planes_array, def_till_complete, battle_id))
+                cur.execute("UPDATE battles SET challenger_defense=%s WHERE id=%s RETURNING *"
+                            , (planes_array, battle_id))
                 b = cur.fetchone()
                 if b:
                     battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
@@ -77,3 +76,12 @@ class BattleDao:
                     return True
                 elif found and found[0] == "NULL":
                     return False
+    def is_time_left(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT (SELECT battle_turn FROM battles WHERE id = %s) >= Now()", (battle_id, ))
+                found = cur.fetchone()
+                if found:
+                    return found[0]
