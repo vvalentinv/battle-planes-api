@@ -21,11 +21,13 @@ class BattleService:
             user = self.user_dao.get_user_by_username(username)
             if b.get_challenger_id() == user.get_user_id():
                 plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
-                plane_ids = None
+                plane_ids = []
                 if plane_id is not None:
-                    plane_ids = b.get_challenger_defense()
+                    plane_ids = b.get_challenger_defense() or plane_ids
                     plane_ids.append(plane_id)
-                return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, plane_ids, username)
+                    return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, plane_ids, len(plane_ids))
+                else:
+                    return "Invalid plane selection."
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 

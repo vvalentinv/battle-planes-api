@@ -29,7 +29,7 @@ def add_battle():
 def add_plane_to_battle_defense_by_username(battle_id):
     r_body = request.get_json()
     # TO DO get username from read-only cookie and pass it as param to service layer
-    username = None
+    username = "jcad2"
     try:
         cockpit = r_body.get('cockpit', None)
         flight_direction = r_body.get('flight_direction', None)
