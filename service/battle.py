@@ -43,21 +43,23 @@ class BattleService:
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
-    def start_battle_by_challenger(self, username, battle_id):
-        if self.battle_dao.is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
+    def start_battle_by_challenger(self, user_id, battle_id):
+        if self.battle_dao.is_engaged(user_id):
             raise BusyPlayer("You are already engaged in another battle")
         if validate_int(battle_id):
             pass
         battle = self.battle_dao.get_battle_by_id(battle_id)
         if battle is None:
             raise InvalidParameter("Request rejected")
-        if battle and battle.get_challenger_id() > 0:
-            raise BusyPlayer(f"{self.user_dao.get_user_by_username(battle.get_challenged_id())} "
-                             f"has already engaged in battle!")
-        if battle.get_challenged_id() == self.user_dao.get_user_by_username(username).get_user_id():
+        elif battle.get_challenger_id() > 0:
+            raise BusyPlayer("This player was already challenged.")
+        elif battle.get_challenged_id() == user_id:
             raise InvalidParameter("Players cannot challenge themselves")
-        return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id,
-                                                        battle.get_defense_size())
+        elif self.battle_dao.is_concluded(battle_id):
+            return "This battle was concluded"
+        elif battle.get_challenger_id() == 0 and not self.battle_dao.is_time_left(battle_id):
+            return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
+        return "Timeframe for challenge just elapsed"
 
     def add_battle(self, username, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \

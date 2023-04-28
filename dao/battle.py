@@ -24,14 +24,14 @@ class BattleDao:
                            f"until defense setup is complete."
                 return None
 
-    def add_challenger_to_battle(self, user, battle_id, defense_size):
+    def add_challenger_to_battle(self, user_id, battle_id, defense_size):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_id=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
-                            , (user.get_user_id(), defense_size, battle_id))
+                            , (user_id, defense_size, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
                     return "Challenge accepted!"
@@ -53,9 +53,10 @@ class BattleDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) VALUES	"
-                            "(0, %s, %s, False, Now() + '%s MINUTE') returning *",
-                            (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
+                cur.execute(
+                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) VALUES	"
+                    "(0, %s, %s, False, Now() + '%s MINUTE') returning *",
+                    (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
                 b = cur.fetchone()
                 if b:
                     return "You have set your defense and waiting for a challenger!"
@@ -76,12 +77,23 @@ class BattleDao:
                     return True
                 elif found and found[0] == "NULL":
                     return False
+
     def is_time_left(self, battle_id):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT (SELECT battle_turn FROM battles WHERE id = %s) >= Now()", (battle_id, ))
+                cur.execute("SELECT (SELECT battle_turn FROM battles WHERE id = %s) >= Now()", (battle_id,))
+                found = cur.fetchone()
+                if found:
+                    return found[0]
+
+    def is_concluded(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT concluded FROM battles WHERE id = %s", (battle_id,))
                 found = cur.fetchone()
                 if found:
                     return found[0]

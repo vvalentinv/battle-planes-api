@@ -56,9 +56,9 @@ def add_plane_to_battle_defense_by_username(battle_id):
 def start_battle_by_challenger(battle_id):
     # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
     # TO DO get user_id from read-only cookie and pass it as param to service layer
-    username = "jcad2"
+    user_id = 2
     try:
-        return {"message": battle_service.start_battle_by_challenger(username, battle_id)}, 200
+        return {"message": battle_service.start_battle_by_challenger(user_id, battle_id)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
