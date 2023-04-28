@@ -8,14 +8,22 @@ load_dotenv()
 
 class BattleDao:
 
-    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array, username):
-        pass
-
-    def get_defense_position(self, battle_id, username):
-        pass
-
-    def get_defense_by_id_username_and_position(self, battle_id, username, position):
-        pass
+    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array, def_till_complete):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET challenger_defense=%s, battle_turn = Now() + "
+                            "'%s MINUTE' WHERE id=%s RETURNING *"
+                            , (planes_array, def_till_complete, battle_id))
+                b = cur.fetchone()
+                if b:
+                    battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
+                    if battle.get_defense_size() == len(battle.get_challenger_defense()):
+                        return "Defense setup complete!"
+                    return f"{battle.get_defense_size() - len(battle.get_challenger_defense())} more plane(s) to add " \
+                           f"until defense setup is complete."
+                return None
 
     def add_challenger_to_battle(self, user, battle_id, defense_size):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),

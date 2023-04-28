@@ -21,11 +21,22 @@ class BattleService:
             user = self.user_dao.get_user_by_username(username)
             if b.get_challenger_id() == user.get_user_id():
                 plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
-                plane_ids = []
                 if plane_id is not None:
-                    plane_ids = b.get_challenger_defense() or plane_ids
-                    plane_ids.append(plane_id)
-                    return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, plane_ids, len(plane_ids))
+                    plane_ids = set()
+                    if b.get_challenger_defense() is not None:
+                        plane_ids.update(b.get_challenger_defense())
+                    old_def_size = len(plane_ids)
+                    plane_ids.add(plane_id)
+                    if len(plane_ids) > old_def_size:
+                        def_till_complete = b.get_defense_size() - len(plane_ids)
+                        if def_till_complete >= 0:
+                            return self.battle_dao.add_plane_to_battle_defense_by_username(
+                                battle_id, list(plane_ids), def_till_complete)
+                        else:
+                            return "Maximum defense size reached."
+                    else:
+                        return "Invalid selection"
+
                 else:
                     return "Invalid plane selection."
         else:
