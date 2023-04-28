@@ -139,7 +139,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"defense\": [1, 2, 3],\r\n    \"defense_size\": 3,\r\n    \"sky_size\": 10\r\n}",
+					"raw": "{\r\n    \"max_time\": 10,\r\n    \"defense\": [1, 2, 3],\r\n    \"defense_size\": 3,\r\n    \"sky_size\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -190,6 +190,75 @@
 					"path": [
 						"battles",
 						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add plane for challenger",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cockpit\": 37,\r\n    \"flight_direction\": 1,\r\n    \"sky_size\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles/3/challengers/defense",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles",
+						"3",
+						"challengers",
+						"defense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "battle status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles/4",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles",
+						"4"
 					]
 				}
 			},
