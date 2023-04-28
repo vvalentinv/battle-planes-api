@@ -14,11 +14,14 @@ def add_battle():
     # TO DO get username from read-only cookie and pass it as param to service layer
     username = "jcad1"  # "default-challenger"
     try:
+        max_time = r_body.get('max_time', None)
         defense = r_body.get('defense', None)
         defense_size = r_body.get('defense_size', None)
         sky_size = r_body.get('sky_size', None)
-        if defense and defense_size and sky_size:
-            return {"message": battle_service.add_battle(username, defense, defense_size, sky_size)}, 200
+        if defense and defense_size and sky_size and max_time:
+            return {"message": battle_service.add_battle(username, defense, defense_size, sky_size, max_time)}, 201
+        else:
+            return "All parameters are required."
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
@@ -34,8 +37,12 @@ def add_plane_to_battle_defense_by_username(battle_id):
         cockpit = r_body.get('cockpit', None)
         flight_direction = r_body.get('flight_direction', None)
         sky_size = r_body.get('sky_size', None)
-        return {"message": battle_service.add_plane_to_battle_defense_by_username(battle_id, username, cockpit,
-                                                                                  flight_direction, sky_size)}, 200
+        if cockpit and flight_direction and sky_size:
+            return {"message": battle_service.add_plane_to_battle_defense_by_username(battle_id, username, cockpit,
+                                                                                      flight_direction, sky_size)}, 200
+        else:
+            raise InvalidParameter("All parameters are required.")
+
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:

@@ -48,14 +48,14 @@ class BattleDao:
                     return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
                 return None
 
-    def add_battle(self, battle):
+    def add_battle(self, battle, max_time):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
                 cur.execute("INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) VALUES	"
-                            "(0, %s, %s, False, Now()) returning *",
-                            (battle.get_challenged_id(), battle.get_challenged_defense()))
+                            "(0, %s, %s, False, Now() + '%s MINUTE') returning *",
+                            (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
                 b = cur.fetchone()
                 if b:
                     return "You have set your defense and waiting for a challenger!"

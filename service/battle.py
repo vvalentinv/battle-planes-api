@@ -59,14 +59,15 @@ class BattleService:
         return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id,
                                                         battle.get_defense_size() )
 
-    def add_battle(self, username, defense, defense_size, sky_size):
-        if validate_int(defense_size) and validate_int(sky_size) and validate_array_of_ints(defense):
+    def add_battle(self, username, defense, defense_size, sky_size, max_time):
+        if validate_int(defense_size) and validate_int(sky_size) \
+                and validate_array_of_ints(defense) and validate_int(max_time):
             pass
         if self.battle_dao.is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
             raise Forbidden("You are already engaged in another battle")
         battle = Battle(None, None, self.user_dao.get_user_by_username(username).get_user_id(),
                         None, defense, sky_size, None, None, None, None, defense_size, None)
-        return self.battle_dao.add_battle(battle)
+        return self.battle_dao.add_battle(battle, max_time)
 
 
 
