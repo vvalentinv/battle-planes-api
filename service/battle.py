@@ -57,7 +57,7 @@ class BattleService:
         if battle.get_challenged_id() == self.user_dao.get_user_by_username(username).get_user_id():
             raise InvalidParameter("Players cannot challenge themselves")
         return self.battle_dao.add_challenger_to_battle(self.user_dao.get_user_by_username(username), battle_id,
-                                                        battle.get_defense_size() )
+                                                        battle.get_defense_size())
 
     def add_battle(self, username, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \
@@ -69,5 +69,28 @@ class BattleService:
                         None, defense, sky_size, None, None, None, None, defense_size, None)
         return self.battle_dao.add_battle(battle, max_time)
 
+    def get_status(self, user_id, battle_id):
+        if validate_int(battle_id):
+            pass
+        b = self.battle_dao.get_battle_by_id(battle_id)
+        if b.get_challenger_attacks() is None:
+            chr_attacks = 0
+        else:
+            chr_attacks = len(b.get_challenger_attacks())
+        if b.get_challenged_attacks() is None:
+            chd_attacks = 0
+        else:
+            chd_attacks = len(b.get_challenger_attacks())
 
-
+        if user_id == b.get_challenger_id():
+            if chr_attacks == chd_attacks:
+                return "This is your turn to attack."
+            else:
+                return "Wait for your opponent's attack."
+        elif user_id == b.get_challenged_id():
+            if chr_attacks > chd_attacks:
+                return "This is your turn to attack."
+            else:
+                return "Wait for your opponent's attack."
+        else:
+            raise Forbidden("This battle is private.")

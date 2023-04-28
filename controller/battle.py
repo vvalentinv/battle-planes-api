@@ -61,3 +61,14 @@ def start_battle_by_challenger(battle_id):
         return {"message": str(e)}, 403
     except BusyPlayer as e:
         return {"message": str(e)}, 205
+
+@bc.route('/battles/<battle_id>')
+def get_battle_status(battle_id):
+    # TO DO get user_id from read-only cookie and pass it as param to service layer
+    user_id = 0
+    try:
+        return {"message": battle_service.get_status(user_id, battle_id)}, 200
+    except InvalidParameter as e:
+        return {"message": str(e)}, 400
+    except Forbidden as e:
+        return {"message": str(e)}, 403
