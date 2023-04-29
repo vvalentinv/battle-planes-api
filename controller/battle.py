@@ -66,6 +66,7 @@ def start_battle_by_challenger(battle_id):
     except BusyPlayer as e:
         return {"message": str(e)}, 205
 
+
 @bc.route('/battles/<battle_id>')
 def get_battle_status(battle_id):
     # Returns a message based on the user requesting it and the number of attacks for each player in the battle record
@@ -73,6 +74,21 @@ def get_battle_status(battle_id):
     user_id = 0
     try:
         return {"message": battle_service.get_status(user_id, battle_id)}, 200
+    except InvalidParameter as e:
+        return {"message": str(e)}, 400
+    except Forbidden as e:
+        return {"message": str(e)}, 403
+
+
+@bc.route('/battles/<battle_id>/attacks', methods=['PUT'])
+def update_battle(battle_id):
+    # Returns 3 possible messages based choice and its effects on opponents defense (Hit, Miss, Kill)
+    user_id = 2
+    r_body = request.get_json()
+    try:
+        sky_size = r_body.get('sky_size', None)
+        attack = r_body.get('attack', None)
+        return {"message": battle_service.battle_update(user_id, battle_id, attack, sky_size)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
