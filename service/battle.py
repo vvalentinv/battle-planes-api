@@ -4,7 +4,7 @@ from dao.user import UserDao
 from exception.busy_player import BusyPlayer
 from exception.forbidden import Forbidden
 from model.battle import Battle
-from utilities.helper import validate_int, validate_array_of_ints
+from utilities.helper import validate_int, validate_array_of_ints, check_attack_effect, random_automatic_attack
 from exception.invalid_parameter import InvalidParameter
 
 
@@ -37,7 +37,8 @@ class BattleService:
                             return "Maximum defense size reached."
                     else:
                         return "Invalid selection"
-
+                elif b.get_concluded():
+                    return "Invalid battle"
                 else:
                     return "Invalid plane selection."
         else:
@@ -61,13 +62,14 @@ class BattleService:
             return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
         return "Timeframe for challenge just elapsed"
 
-    def add_battle(self, username, defense, defense_size, sky_size, max_time):
+    def add_battle(self, user_id, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \
                 and validate_array_of_ints(defense) and validate_int(max_time):
             pass
-        if self.battle_dao.is_engaged(self.user_dao.get_user_by_username(username).get_user_id()):
+        if self.battle_dao.conclude_unchallenged_battles(user_id) and \
+                self.battle_dao.is_engaged(user_id):
             raise Forbidden("You are already engaged in another battle")
-        battle = Battle(None, None, self.user_dao.get_user_by_username(username).get_user_id(),
+        battle = Battle(None, None, user_id,
                         None, defense, sky_size, None, None, None, None, defense_size, None)
         return self.battle_dao.add_battle(battle, max_time)
 
@@ -75,6 +77,8 @@ class BattleService:
         if validate_int(battle_id):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
+        if b is None:
+            raise Forbidden("Request rejected")
         if b.get_challenger_attacks() is None:
             chr_attacks = 0
         else:
@@ -96,3 +100,80 @@ class BattleService:
                 return "Wait for your opponent's attack."
         else:
             raise Forbidden("This battle is private.")
+
+    def battle_update(self, user_id, battle_id, attack, sky_size):
+        if validate_int(battle_id) and validate_int(attack) and validate_int(sky_size):
+            pass
+        b = self.battle_dao.get_battle_by_id(battle_id)
+        if b is None or b.get_concluded():
+            raise Forbidden("Request rejected")
+        sky = b.get_sky_size()
+        if attack not in range(sky_size * sky_size) or not sky == sky_size:
+            raise InvalidParameter("Invalid parameter(s).")
+        cr = b.get_challenger_id()
+        cd = b.get_challenged_id()
+        cr_attacks = b.get_challenger_attacks() or [0]
+        cd_attacks = b.get_challenged_attacks() or [0]
+        cr_defense = b.get_challenger_defense()
+        cd_defense = b.get_challenged_defense()
+        message = None
+        cd_atk = cr_atk = None
+        rand = False
+        if not cr == user_id and not cd == user_id and cr == 0:
+            raise Forbidden("Request rejected. not playing")
+        if cr == user_id:
+            # check if it's challenger's turn (attack fields have same lengths
+            if len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
+                if not self.battle_dao.is_time_left(battle_id):
+                    attack = random_automatic_attack(cr_attacks, b.get_sky_size())
+                    rand = True
+                print(attack)
+                print(rand)
+                # add attack value to battle
+                # check for effect on defense
+                # return message
+                planes = []
+                for plane_id in cd_defense:
+                    planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+                message = check_attack_effect(attack, planes)
+                print(message)
+            elif attack in cr_attacks:
+                raise InvalidParameter("Attack already used")
+            # challenged player's turn
+            elif len(cr_attacks) > len(cd_attacks):
+                raise InvalidParameter("Wait for your turn.")
+            if not rand:
+                cr_atk = self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks.append(attack))
+            else:
+                pass
+                # add code to update battle record data with rand attacks and able to identify consecutive rand attacks
+
+        else:
+            # check if it's challenger's turn (attack fields have same lengths
+            if len(cr_attacks) > len(cd_attacks) and attack not in cd_attacks:
+                if not self.battle_dao.is_time_left(battle_id):
+                    attack = random_automatic_attack(cd_attacks, b.get_sky_size())
+                    rand = True
+                # add attack value to battle
+                # check for effect on defense
+                # return message
+                planes = []
+                for plane_id in cr_defense:
+                    planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+                message = check_attack_effect(attack, planes)
+            elif attack in cd_attacks:
+                raise InvalidParameter("Attack already used")
+            # challenger's turn
+            elif len(cr_attacks) == len(cd_attacks):
+                raise InvalidParameter("Wait for your turn.")
+            if not rand:
+                cd_atk = self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks.append(attack))
+        if cr_atk or cd_atk:
+            return message
+        else:
+            # add code to update battle record data with rand attacks and able to identify consecutive rand attacks
+            pass
+
+
+
+

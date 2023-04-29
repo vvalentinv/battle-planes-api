@@ -13,7 +13,7 @@ def add_battle():
     # Adds a battle record for a player that already selected battle parameters, their defense, and the maximum
     # amount of time willing to wait for a challenger
     # TO DO get username from read-only cookie and pass it as param to service layer
-    username = "jcad1"  # "default-challenger"
+    user_id = 1
     r_body = request.get_json()
     try:
         max_time = r_body.get('max_time', None)
@@ -21,7 +21,7 @@ def add_battle():
         defense_size = r_body.get('defense_size', None)
         sky_size = r_body.get('sky_size', None)
         if defense and defense_size and sky_size and max_time:
-            return {"message": battle_service.add_battle(username, defense, defense_size, sky_size, max_time)}, 201
+            return {"message": battle_service.add_battle(user_id, defense, defense_size, sky_size, max_time)}, 201
         else:
             return "All parameters are required."
     except InvalidParameter as e:
