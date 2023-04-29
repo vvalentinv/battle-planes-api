@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS flight_directions
 DROP TABLE IF EXISTS planes;
+DROP TABLE IF EXISTS battles; 
 
 CREATE EXTENSION IF NOT EXISTS intarray;
 
@@ -36,7 +37,7 @@ CREATE TABLE battles(
 	challenger_attacks INT[],
 	challenged_attacks INT[],
 	consec_rnd_attack_count INT DEFAULT 0,
-	concluded INT DEFAULT 0,
+	concluded BOOLEAN  NOT NULL DEFAULT False,
 	defense_size INT DEFAULT 3,
 	battle_turn TIMESTAMP,
 	CONSTRAINT fk_challenger_id
@@ -48,6 +49,16 @@ CREATE TABLE battles(
 INSERT INTO users (id, username, pass, email) VALUES (0, 'default-challenger', '', '');
 INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4, 'West');
 
+INSERT INTO battles (challenged_id, challenged_defense, concluded, battle_turn) VALUES 
+					(0, array[1,2,3], False, Now());
+update battles set concluded  = true  WHERE id = 5;
+SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
+select (Select battle_turn from battles b Where id = 6) > Now();
+
+delete from battles;
 select * from flight_directions f ;
 select * from users u ;
 select * from planes p ;
+select * from battles b ;
+
+

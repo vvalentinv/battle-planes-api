@@ -1,5 +1,6 @@
 import bcrypt
 import re
+import random
 from exception.invalid_parameter import InvalidParameter
 
 
@@ -158,8 +159,20 @@ def validate_array_of_ints(defense):
     return True
 
 
+def check_attack_effect(attack, planes):
+    result_message = 'Miss'
+    for plane in planes:
+        if plane.get_cockpit() == attack:
+            result_message = 'Kill'
+        elif attack in plane.get_body():
+            result_message = 'Hit'
+    return result_message
 
 
-
-
-
+def random_automatic_attack(attacks, sky_size):
+    attacks_set = set(attacks)
+    attack = None
+    while len(attacks) == len(attacks_set):
+        attack = random.randint(1, sky_size * sky_size)
+        attacks_set.add(attack)
+    return attack
