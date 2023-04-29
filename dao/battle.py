@@ -97,3 +97,42 @@ class BattleDao:
                 found = cur.fetchone()
                 if found:
                     return found[0]
+
+    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET challenger_attacks=%s, battle_turn = Now() + '%s MINUTE' "
+                            "WHERE id=%s RETURNING *"
+                            , (attacks, turn_time, battle_id))
+                inserted_user = cur.fetchone()
+                if inserted_user:
+                    return True
+                return None
+
+    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET challenged_attacks=%s, battle_turn = Now() + '%s MINUTE' "
+                            "WHERE id=%s RETURNING *"
+                            , (attacks, turn_time, battle_id))
+                inserted_user = cur.fetchone()
+                if inserted_user:
+                    return True
+                return None
+
+    def conclude_unchallenged_battles(self, user_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = true "
+                            "WHERE battle_turn < Now() AND id=%s AND challenger_id=0 RETURNING *"
+                            , (user_id,))
+                inserted_user = cur.fetchone()
+                if inserted_user:
+                    return True
+                return None
