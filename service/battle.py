@@ -145,8 +145,7 @@ class BattleService:
             if not rand:
                 cr_atk = self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks.append(attack))
             else:
-                pass
-                # add code to update battle record data with rand attacks and able to identify consecutive rand attacks
+                cr_atk = self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_attacks.append(attack))
 
         else:
             # check if it's challenger's turn (attack fields have same lengths
@@ -168,11 +167,11 @@ class BattleService:
                 raise InvalidParameter("Wait for your turn.")
             if not rand:
                 cd_atk = self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks.append(attack))
+            else:
+                cd_atk = self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cr_attacks.append(attack))
         if cr_atk or cd_atk:
             return message
-        else:
-            # add code to update battle record data with rand attacks and able to identify consecutive rand attacks
-            pass
+
 
 
 
