@@ -17,7 +17,7 @@ class BattleDao:
                             , (planes_array, battle_id))
                 b = cur.fetchone()
                 if b:
-                    battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
+                    battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
                     if battle.get_defense_size() == len(battle.get_challenger_defense()):
                         return "Defense setup complete!"
                     return f"{battle.get_defense_size() - len(battle.get_challenger_defense())} more plane(s) to add " \
@@ -45,7 +45,7 @@ class BattleDao:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
                 b = cur.fetchone()
                 if b:
-                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11])
+                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
                 return None
 
     def add_battle(self, battle, max_time):
@@ -70,7 +70,8 @@ class BattleDao:
                 cur.execute("SELECT (SELECT challenger_id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
                             "UNION "
-                            "       SELECT challenged_id FROM battles WHERE concluded IS False AND challenged_id = %s )"
+                            "SELECT challenged_id FROM battles WHERE concluded IS False AND challenged_id = %s AND "
+                            "challenger_id <> 0 ) "
                             " = %s", (user_id, user_id, user_id))
                 found = cur.fetchone()
                 if found and found[0]:
@@ -99,6 +100,7 @@ class BattleDao:
                     return found[0]
 
     def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+        print(attacks)
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
@@ -108,6 +110,7 @@ class BattleDao:
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
+                    print(inserted_user)
                     return True
                 return None
 
@@ -129,10 +132,37 @@ class BattleDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = true "
-                            "WHERE battle_turn < Now() AND id=%s AND challenger_id=0 RETURNING *"
+                cur.execute("UPDATE battles SET concluded = True "
+                            "WHERE challenged_id = %s AND challenger_id=0"
                             , (user_id,))
+                return True
+
+    def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+        print(attacks)
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET rnd_attack_er=%s, battle_turn = Now() + '%s MINUTE' "
+                            "WHERE id=%s RETURNING *"
+                            , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
+                    print(inserted_user)
+                    return True
+                return None
+
+    def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+        print(attacks)
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET rnd_attack_ed=%s, battle_turn = Now() + '%s MINUTE' "
+                            "WHERE id=%s RETURNING *"
+                            , (attacks, turn_time, battle_id))
+                inserted_user = cur.fetchone()
+                if inserted_user:
+                    print(inserted_user)
                     return True
                 return None
