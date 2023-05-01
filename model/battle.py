@@ -1,6 +1,6 @@
 class Battle:
     def __init__(self, battle_id, challenger_id,	challenged_id, challenger_defense, challenged_defense,
-                 sky_size, challenger_attacks, challenged_attacks, consec_rnd_attack_count, concluded,
+                 sky_size, challenger_attacks, challenged_attacks, rnd_attack_er, rnd_attack_ed, concluded,
                  defense_size, battle_turn):
         self.__battle_id = battle_id
         self.__challenger_id = challenger_id
@@ -10,7 +10,8 @@ class Battle:
         self.__sky_size = sky_size
         self.__challenger_attacks = challenger_attacks
         self.__challenged_attacks = challenged_attacks
-        self.__consec_rnd_attack_count = consec_rnd_attack_count
+        self.__rnd_attack_er = rnd_attack_er
+        self.__rnd_attack_ed = rnd_attack_ed
         self.__concluded = concluded
         self.__defense_size = defense_size
         self.__battle_turn = battle_turn
@@ -39,8 +40,11 @@ class Battle:
     def get_challenged_attacks(self):
         return self.__challenged_attacks
 
-    def get_consec_rnd_attack_count(self):
-        return self.__consec_rnd_attack_count
+    def get_rnd_attack_er(self):
+        return self.__rnd_attack_er
+
+    def get_rnd_attack_ed(self):
+        return self.__rnd_attack_ed
 
     def get_concluded(self):
         return self.__concluded
@@ -75,8 +79,11 @@ class Battle:
     def set_challenged_attacks(self, value):
         self.__challenged_attacks = value
 
-    def set_consec_rnd_attack_count(self, value):
-        self.__consec_rnd_attack_count = value
+    def set_rnd_attack_er(self, value):
+        self.__rnd_attack_er = value
+
+    def set_rnd_attack_ed(self, value):
+        self.__rnd_attack_ed = value
 
     def set_concluded(self, value):
         self.__concluded = value
@@ -97,7 +104,8 @@ class Battle:
             'sky_size': self.get_sky_size(),
             'challenger_attacks': self.get_challenger_attacks(),
             'challenged_attacks': self.get_challenged_attacks(),
-            'consec_rnd_attack_count': self.get_consec_rnd_attack_count(),
+            'rnd_attack_er': self.get_rnd_attack_er(),
+            'rnd_attack_ed': self.get_rnd_attack_ed(),
             'concluded': self.get_concluded(),
             'defense_size': self.get_defense_size(),
             'battle_turn': self.get_battle_turn()

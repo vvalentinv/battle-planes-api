@@ -36,7 +36,8 @@ CREATE TABLE battles(
 	sky_size INT DEFAULT 10,
 	challenger_attacks INT[],
 	challenged_attacks INT[],
-	consec_rnd_attack_count INT DEFAULT 0,
+	rnd_attack_er INT[],
+	rnd_attack_ed INT[],
 	concluded BOOLEAN  NOT NULL DEFAULT False,
 	defense_size INT DEFAULT 3,
 	battle_turn TIMESTAMP,
@@ -51,7 +52,7 @@ INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4
 
 INSERT INTO battles (challenged_id, challenged_defense, concluded, battle_turn) VALUES 
 					(0, array[1,2,3], False, Now());
-update battles set concluded  = true  WHERE id = 5;
+update battles set concluded  = true  WHERE id = 6;
 SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
 select (Select battle_turn from battles b Where id = 6) > Now();
 
@@ -60,5 +61,6 @@ select * from flight_directions f ;
 select * from users u ;
 select * from planes p ;
 select * from battles b ;
+
 
 
