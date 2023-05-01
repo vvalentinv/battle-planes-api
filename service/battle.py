@@ -1,7 +1,6 @@
 from dao.battle import BattleDao
 from dao.plane import PlaneDao
 from dao.user import UserDao
-from exception.busy_player import BusyPlayer
 from exception.forbidden import Forbidden
 from model.battle import Battle
 from utilities.helper import validate_int, validate_array_of_ints, check_attack_effect, random_automatic_attack, \
@@ -44,14 +43,14 @@ class BattleService:
 
     def start_battle_by_challenger(self, user_id, battle_id):
         if self.battle_dao.is_engaged(user_id):
-            raise BusyPlayer("You are already engaged in another battle")
+            raise Forbidden("You are already engaged in another battle")
         if validate_int(battle_id):
             pass
         battle = self.battle_dao.get_battle_by_id(battle_id)
         if battle is None:
             raise InvalidParameter("Request rejected")
         elif battle.get_challenger_id() > 0:
-            raise BusyPlayer("This player was already challenged.")
+            raise Forbidden("This player was already challenged.")
         elif battle.get_challenged_id() == user_id:
             raise InvalidParameter("Players cannot challenge themselves")
         elif self.battle_dao.is_concluded(battle_id):
