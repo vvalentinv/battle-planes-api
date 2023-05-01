@@ -31,18 +31,19 @@ def add_battle():
 
 
 @bc.route('/battles/<battle_id>/challengers/defense', methods=['PUT'])
-def add_plane_to_battle_defense_by_username(battle_id):
+def add_plane_to_battle_defense_by_challenger(battle_id):
     # Adds plane id to challenger's defense array if the user_id, battle_id and plane selection are validated
     r_body = request.get_json()
-    # TO DO get username from read-only cookie and pass it as param to service layer
-    username = "jcad2"
+    # TO DO get user_id from read-only cookie and pass it as param to service layer
+    user_id = 2
     try:
         cockpit = r_body.get('cockpit', None)
         flight_direction = r_body.get('flight_direction', None)
         sky_size = r_body.get('sky_size', None)
         if cockpit and flight_direction and sky_size:
-            return {"message": battle_service.add_plane_to_battle_defense_by_username(battle_id, username, cockpit,
-                                                                                      flight_direction, sky_size)}, 200
+            return {"message": battle_service.add_plane_to_battle_defense_by_challenger(battle_id, user_id, cockpit,
+                                                                                        flight_direction,
+                                                                                        sky_size)}, 200
         else:
             raise InvalidParameter("All parameters are required.")
 
@@ -83,12 +84,11 @@ def get_battle_status(battle_id):
 @bc.route('/battles/<battle_id>/attacks', methods=['PUT'])
 def update_battle(battle_id):
     # Returns 3 possible messages based choice and its effects on opponents defense (Hit, Miss, Kill)
-    user_id = 2
+    user_id = 1
     r_body = request.get_json()
     try:
-        sky_size = r_body.get('sky_size', None)
         attack = r_body.get('attack', None)
-        return {"message": battle_service.battle_update(user_id, battle_id, attack, sky_size)}, 200
+        return {"message": battle_service.battle_update(user_id, battle_id, attack)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
