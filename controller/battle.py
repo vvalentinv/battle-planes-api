@@ -85,7 +85,7 @@ def update_battle(battle_id):
     r_body = request.get_json()
     try:
         attack = r_body.get('attack', None)
-        return {"message": battle_service.battle_update(user_id, battle_id, attack)}, 200
+        return {"messages": battle_service.battle_update(user_id, battle_id, attack)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:

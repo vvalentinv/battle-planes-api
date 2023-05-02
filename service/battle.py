@@ -3,7 +3,7 @@ from dao.plane import PlaneDao
 from dao.user import UserDao
 from exception.forbidden import Forbidden
 from model.battle import Battle
-from utilities.helper import validate_int, validate_array_of_ints, check_attack_effect, random_automatic_attack, \
+from utilities.helper import validate_int, validate_array_of_ints, random_automatic_attack, \
     evaluate_attack, evaluate_disconnect, check_progress
 from exception.invalid_parameter import InvalidParameter
 
@@ -137,21 +137,22 @@ class BattleService:
                 if not not_rand:
                     attack = random_automatic_attack(cr_attacks, b.get_sky_size())
                     cr_rnd_attacks.append(attack)
-                    not_rand = True
                 cr_attacks.append(attack)
-            if not not_rand:
+            if not_rand:
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
             else:
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
                 self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
             # Next var determines if a battle is finished playing against random attacks or inconclusive by
             # disconnection
-            check_opponents_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
-            message = "Your attack was a " + check_attack_effect(cr_attacks[-1], cd_planes)
-            if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponents_overall_progress):
-                return message
-            else:
-                return evaluate_attack(cr_attacks, cd_planes)
+            check_opponent_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
+            if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):
+                self.battle_dao.conclude_unfinished_battle(battle_id)
+                return list("Battle inconclusive by player disconnect.")
+            messages = evaluate_attack(cr_attacks, cd_planes)
+            if messages[-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id)
+            return messages
         else:
             if attack in cd_attacks:
                 raise InvalidParameter("Attack already used")
@@ -161,18 +162,22 @@ class BattleService:
                 if not not_rand:
                     attack = random_automatic_attack(cd_attacks, b.get_sky_size())
                     cd_rnd_attacks.append(attack)
-                    not_rand = True
                 cd_attacks.append(attack)
-            if not not_rand:
+            if not_rand:
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
             else:
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
                 self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
             # Next var determines if a battle is finished playing against random attacks or inconclusive by
             # disconnection
-            check_opponents_overall_progress = check_progress(cd_attacks, cr_planes)
-            message = "Your attack was a " + check_attack_effect(cd_attacks[-1], cr_planes)
-            return evaluate_attack(cr_attacks, cr_rnd_attacks, cd_planes, check_opponents_overall_progress)
+            check_opponent_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
+            if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
+                self.battle_dao.conclude_unfinished_battle(battle_id)
+                return list("Battle inconclusive by player disconnect.")
+            messages = evaluate_attack(cd_attacks, cr_planes)
+            if messages[-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id)
+            return messages
 
 
 
