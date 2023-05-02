@@ -160,14 +160,14 @@ def validate_array_of_ints(defense):
     return True
 
 
-def check_attack_effect(attack, planes):
-    result_message = 'Miss'
-    for plane in planes:
-        if plane.get_cockpit() == attack:
-            result_message = 'Kill'
-        elif attack in plane.get_body():
-            result_message = 'Hit'
-    return result_message
+# def check_attack_effect(attack, planes):
+#     result_message = 'Miss'
+#     for plane in planes:
+#         if plane.get_cockpit() == attack:
+#             result_message = 'Kill'
+#         elif attack in plane.get_body():
+#             result_message = 'Hit'
+#     return result_message
 
 
 def random_automatic_attack(attacks, sky_size):
@@ -180,8 +180,8 @@ def random_automatic_attack(attacks, sky_size):
 
 
 def evaluate_disconnect(attacks, rnd_attacks, check_opponents_overall_progress):
-    attacks_str = ''.join(attacks(e) for e in attacks)
-    rnd_attacks_str = ''.join(rnd_attacks(e) for e in rnd_attacks)
+    attacks_str = ''.join(str(e) for e in attacks)
+    rnd_attacks_str = ''.join(str(e) for e in rnd_attacks)
     if check_opponents_overall_progress:
         return False
     elif rnd_attacks_str in attacks_str and len(rnd_attacks_str) < 4:
@@ -205,7 +205,8 @@ def check_progress(attacks, planes, def_size):
                 if a == p.get_cockpit():
                     bodies_list.remove(p.get_body())
         for body in bodies_list:
-            body.remove(a)
+            if a in body:
+                body.remove(a)
     for body in bodies_list:
         if not body:
             counter += 1
@@ -216,6 +217,31 @@ def check_progress(attacks, planes, def_size):
 
 
 def evaluate_attack(attacks, planes):
-    pass
-
+    messages = []
+    planes_health_list = []
+    for p in planes:
+        plane_health = []
+        plane_health.append(p.get_cockpit())
+        for i in p.get_body():
+            plane_health.append(i)
+        planes_health_list.append(plane_health)
+    print("initial")
+    print(planes_health_list)
+    for a in attacks:
+        for p in planes_health_list:
+            if p[0] == a:
+                messages.append((a, "Kill"))
+                planes_health_list.remove(p)
+                break
+            elif a in p:
+                messages.append((a, "Hit"))
+                p.remove(a)
+                break
+        else:
+            messages.append((a, "Miss"))
+    print(planes_health_list)
+    if not planes_health_list or {len(i[1]) for i in planes_health_list} == 0:
+        print(planes_health_list)
+        messages.append("Battle won by last attack!")
+    return messages
 

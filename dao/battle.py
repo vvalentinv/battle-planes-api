@@ -138,7 +138,6 @@ class BattleDao:
                 return True
 
     def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        print(attacks)
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
@@ -148,12 +147,10 @@ class BattleDao:
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
-                    print(inserted_user)
                     return True
                 return None
 
     def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        print(attacks)
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
@@ -163,6 +160,26 @@ class BattleDao:
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
-                    print(inserted_user)
                     return True
                 return None
+
+    def conclude_unfinished_battle(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
+                            "WHERE id = %s"
+                            , (battle_id,))
+                return True
+
+    def conclude_won_battle(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
+                            "WHERE id = %s"
+                            , (battle_id,))
+                print("won")
+                return True

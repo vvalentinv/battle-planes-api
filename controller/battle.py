@@ -1,5 +1,4 @@
 from flask import Blueprint, request
-from exception.busy_player import BusyPlayer
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
 from service.battle import BattleService
@@ -64,8 +63,6 @@ def start_battle_by_challenger(battle_id):
         return {"message": str(e)}, 400
     except Forbidden as e:
         return {"message": str(e)}, 403
-    except BusyPlayer as e:
-        return {"message": str(e)}, 205
 
 
 @bc.route('/battles/<battle_id>')
@@ -88,7 +85,7 @@ def update_battle(battle_id):
     r_body = request.get_json()
     try:
         attack = r_body.get('attack', None)
-        return {"message": battle_service.battle_update(user_id, battle_id, attack)}, 200
+        return {"messages": battle_service.battle_update(user_id, battle_id, attack)}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
