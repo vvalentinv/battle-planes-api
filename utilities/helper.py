@@ -235,6 +235,8 @@ def evaluate_attack(attacks, planes):
             elif a in p[1]:
                 messages.append((a, "Hit"))
                 p[1].remove(a)
+                if not p[1]:
+                    messages.append((a, "Kill"))
                 break
         else:
             messages.append((a, "Miss"))
