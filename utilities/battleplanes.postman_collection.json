@@ -178,7 +178,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/3",
+					"raw": "http://127.0.0.1:5000/battles/16",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -189,20 +189,20 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"3"
+						"16"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "add plane for challenger",
+			"name": "add plane 1 to def",
 			"request": {
 				"method": "PUT",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"cockpit\": 37,\r\n    \"flight_direction\": 1,\r\n    \"sky_size\": 10\r\n}",
+					"raw": "{\r\n    \"cockpit\": 37,\r\n    \"flight_direction\": 2,\r\n    \"sky_size\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -210,7 +210,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/3/challengers/defense",
+					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -221,7 +221,75 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"3",
+						"16",
+						"challengers",
+						"defense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add plane 2 to def",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cockpit\": 63,\r\n    \"flight_direction\": 3,\r\n    \"sky_size\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles",
+						"16",
+						"challengers",
+						"defense"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add plane 3 to def",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cockpit\": 25,\r\n    \"flight_direction\": 2,\r\n    \"sky_size\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles",
+						"16",
 						"challengers",
 						"defense"
 					]
@@ -247,7 +315,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/4",
+					"raw": "http://127.0.0.1:5000/battles/15",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -258,7 +326,40 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"4"
+						"15"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "attack",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"attack\": 92\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles/14/attacks",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles",
+						"14",
+						"attacks"
 					]
 				}
 			},
