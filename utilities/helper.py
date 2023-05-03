@@ -220,8 +220,7 @@ def evaluate_attack(attacks, planes):
     messages = []
     planes_health_list = []
     for p in planes:
-        plane_health = []
-        plane_health.append(p.get_cockpit())
+        plane_health = [p.get_cockpit()]
         for i in p.get_body():
             plane_health.append(i)
         planes_health_list.append(plane_health)
@@ -233,9 +232,11 @@ def evaluate_attack(attacks, planes):
                 messages.append((a, "Kill"))
                 planes_health_list.remove(p)
                 break
-            elif a in p:
+            elif a in p[1]:
                 messages.append((a, "Hit"))
-                p.remove(a)
+                p[1].remove(a)
+                if not p[1]:
+                    messages.append((a, "Kill"))
                 break
         else:
             messages.append((a, "Miss"))
