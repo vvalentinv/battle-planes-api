@@ -34,8 +34,8 @@ class BattleService:
                             return "Time frame to add planes for defense setup elapsed."
                         else:
                             return "Maximum defense size reached."
-                else:
-                    return "Invalid selection"
+                    else:
+                        return "Invalid selection"
             elif b.get_concluded():
                 return "Invalid battle"
         else:
