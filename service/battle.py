@@ -81,6 +81,7 @@ class BattleService:
             raise InvalidParameter("Use battle history")
         cr_attacks = b.get_challenger_attacks() or []
         cd_attacks = b.get_challenged_attacks() or []
+        messages = None
         # conclude unfinished defense setups
         if b.get_challenger_id() and not cr_attacks and not self.battle_dao.is_time_left(battle_id):
             self.battle_dao.conclude_unfinished_battle(battle_id)
