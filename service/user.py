@@ -1,6 +1,7 @@
 from dao.user import UserDao
 from exception.forbidden import Forbidden
-from utilities.helper import validate_password, validate_username, validate_email, validate_password_value
+from utilities.input_validation_helper import validate_password, validate_username, validate_email, \
+    validate_password_value
 
 
 class UserService:

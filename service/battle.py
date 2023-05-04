@@ -3,8 +3,8 @@ from dao.plane import PlaneDao
 from dao.user import UserDao
 from exception.forbidden import Forbidden
 from model.battle import Battle
-from utilities.helper import validate_int, validate_array_of_ints, random_automatic_attack, \
-    evaluate_attack, evaluate_disconnect, check_progress
+from utilities.input_validation_helper import validate_int, validate_array_of_ints
+from utilities.helper import random_automatic_attack, evaluate_attack, evaluate_disconnect, check_progress
 from exception.invalid_parameter import InvalidParameter
 
 

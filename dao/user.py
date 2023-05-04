@@ -1,5 +1,5 @@
 from model.user import User
-from utilities.helper import hash_registering_password
+from utilities.input_validation_helper import hash_registering_password
 from dotenv import load_dotenv
 import os
 import psycopg2
