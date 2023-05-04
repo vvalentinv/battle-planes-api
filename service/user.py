@@ -1,21 +1,23 @@
 from dao.user import UserDao
 from exception.forbidden import Forbidden
-from utilities.helper import validate_password, validate_username, validate_email, validate_password_value
+from model.user import User
+from utilities.input_validation_helper import validate_password, validate_username, validate_email, \
+    validate_password_value
 
 
 class UserService:
     def __init__(self):
         self.user_dao = UserDao()
 
-    def add_user(self, user):
-        if validate_username(user.get_username()) and \
-                validate_email(user.get_email()) and validate_password_value(user.get_password()):
+    def add_user(self, username, password, email):
+        if validate_username(username) and \
+                validate_email(email) and validate_password_value(password):
             pass
-        if self.user_dao.check_for_username(user.get_username()):
+        if self.user_dao.check_for_username(username):
             raise Forbidden("This username is already in use! Please try again.")
-        if self.user_dao.check_for_email(user.get_email()):
+        if self.user_dao.check_for_email(email):
             raise Forbidden("This email is already in use! Please sign into your existing account.")
-        return self.user_dao.add_user(user)
+        return self.user_dao.add_user(User(None, username, password, email))
 
     def update_user(self, username, password, n_pwd, email):
         if email is not None:

@@ -69,7 +69,7 @@ def start_battle_by_challenger(battle_id):
 def get_battle_status(battle_id):
     # Returns a message based on the user requesting it and the number of attacks for each player in the battle record
     # TO DO get user_id from read-only cookie and pass it as param to service layer
-    user_id = 1
+    user_id = 2
     try:
         return {"message": battle_service.get_status(user_id, battle_id)}, 200
     except InvalidParameter as e:
@@ -81,7 +81,7 @@ def get_battle_status(battle_id):
 @bc.route('/battles/<battle_id>/attacks', methods=['PUT'])
 def update_battle(battle_id):
     # Returns 3 possible messages based choice and its effects on opponents defense (Hit, Miss, Kill)
-    user_id = 2
+    user_id = 1
     r_body = request.get_json()
     try:
         attack = r_body.get('attack', None)

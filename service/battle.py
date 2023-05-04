@@ -3,8 +3,8 @@ from dao.plane import PlaneDao
 from dao.user import UserDao
 from exception.forbidden import Forbidden
 from model.battle import Battle
-from utilities.helper import validate_int, validate_array_of_ints, random_automatic_attack, \
-    evaluate_attack, evaluate_disconnect, check_progress
+from utilities.input_validation_helper import validate_int, validate_array_of_ints
+from utilities.helper import random_automatic_attack, evaluate_attack, evaluate_disconnect, check_progress
 from exception.invalid_parameter import InvalidParameter
 
 
@@ -100,6 +100,10 @@ class BattleService:
                 turn = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks) + 1 and self.battle_dao.is_time_left(battle_id):
                 turn = "Wait for your opponent's attack."
+                check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
+                if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
+                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    return "Battle inconclusive by player disconnect."
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) and not self.battle_dao.is_time_left(battle_id):
                 attack = random_automatic_attack(cr_attacks, b.get_sky_size())
@@ -118,6 +122,10 @@ class BattleService:
                 turn = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks) and self.battle_dao.is_time_left(battle_id):
                 turn = "Wait for your opponent's attack."
+                check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
+                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):
+                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    return "Battle inconclusive by player disconnect."
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) + 1 and not self.battle_dao.is_time_left(battle_id):
                 attack = random_automatic_attack(cd_attacks, b.get_sky_size())
@@ -181,7 +189,7 @@ class BattleService:
             check_opponent_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
             if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):
                 self.battle_dao.conclude_unfinished_battle(battle_id)
-                return list("Battle inconclusive by player disconnect.")
+                return "Battle inconclusive by player disconnect."
             messages = evaluate_attack(cr_attacks, cd_planes)
             if messages[-1] == "Battle won by last attack!":
                 self.battle_dao.conclude_won_battle(battle_id)
@@ -206,12 +214,8 @@ class BattleService:
             check_opponent_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
             if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
                 self.battle_dao.conclude_unfinished_battle(battle_id)
-                return list("Battle inconclusive by player disconnect.")
+                return "Battle inconclusive by player disconnect."
             messages = evaluate_attack(cd_attacks, cr_planes)
             if messages[-1] == "Battle won by last attack!":
                 self.battle_dao.conclude_won_battle(battle_id)
             return messages
-
-
-
-
