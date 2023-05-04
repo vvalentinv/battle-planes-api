@@ -233,10 +233,10 @@ def evaluate_attack(attacks, planes):
                 planes_health_list.remove(p)
                 break
             elif a in p[1]:
-                messages.append((a, "Hit"))
                 p[1].remove(a)
                 if not p[1]:
                     messages.append((a, "Kill"))
+                messages.append((a, "Hit"))
                 break
         else:
             messages.append((a, "Miss"))
