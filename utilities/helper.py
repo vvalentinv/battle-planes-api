@@ -1,4 +1,9 @@
 import random
+import bcrypt
+
+
+def hash_registering_password(passwd):
+    return bcrypt.hashpw(passwd, bcrypt.gensalt())
 
 
 def build_plane(cockpit, sky_size, flight_direction):
