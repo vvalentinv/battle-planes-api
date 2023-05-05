@@ -3,10 +3,6 @@ import re
 from exception.invalid_parameter import InvalidParameter
 
 
-def hash_registering_password(passwd):
-    return bcrypt.hashpw(passwd, bcrypt.gensalt())
-
-
 def validate_password(passwd, pw_hash):
     return bcrypt.checkpw(passwd.encode(), pw_hash.encode())
 
