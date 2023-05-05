@@ -52,7 +52,7 @@ INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4
 
 INSERT INTO battles (challenged_id, challenged_defense, concluded, battle_turn) VALUES 
 					(0, array[1,2,3], False, Now());
-update battles set concluded  = true  WHERE id = 6;
+update battles set concluded  = false  WHERE id = 16;
 SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
 select (Select battle_turn from battles b Where id = 6) > Now();
 
@@ -62,5 +62,12 @@ select * from users u ;
 select * from planes p ;
 select * from battles b ;
 
-
+SELECT (SELECT challenger_id 
+		FROM battles
+        WHERE concluded IS False AND challenger_id = 2
+		UNION
+     	SELECT challenged_id 
+     	FROM battles 
+     	WHERE concluded IS False AND challenged_id = 2 AND challenger_id <> 0 )
+     	 = 2;
 
