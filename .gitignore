@@ -3,3 +3,4 @@ venv
 **/__init__.py
 .env
 **/__pycache__
+.coverage
