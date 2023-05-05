@@ -12,12 +12,11 @@ class UserService:
     def add_user(self, username, password, email):
         if validate_username(username) and \
                 validate_email(email) and validate_password_value(password):
-            pass
-        if self.user_dao.check_for_username(username):
-            raise Forbidden("This username is already in use! Please try again.")
-        if self.user_dao.check_for_email(email):
-            raise Forbidden("This email is already in use! Please sign into your existing account.")
-        return self.user_dao.add_user(User(None, username, password, email))
+            if self.user_dao.check_for_username(username):
+                raise Forbidden("This username is already in use! Please try again.")
+            if self.user_dao.check_for_email(email):
+                raise Forbidden("This email is already in use! Please sign into your existing account.")
+            return self.user_dao.add_user(User(None, username, password, email))
 
     def update_user(self, username, password, n_pwd, email):
         if email is not None:
