@@ -3,7 +3,7 @@ from dao.plane import PlaneDao
 from dao.user import UserDao
 from exception.forbidden import Forbidden
 from model.battle import Battle
-from service.input_validation_helper import validate_int, validate_array_of_ints
+from service.input_validation_helper import validate_int, validate_flight_direction, validate_array_of_ints
 from utilities.helper import random_automatic_attack, evaluate_attack, evaluate_disconnect, check_progress
 from exception.invalid_parameter import InvalidParameter
 
@@ -15,7 +15,7 @@ class BattleService:
         self.user_dao = UserDao()
 
     def add_plane_to_battle_defense_by_challenger(self, battle_id, user_id, cockpit, flight_direction, sky_size):
-        if validate_int(battle_id) and validate_int(cockpit) and validate_int(flight_direction) \
+        if validate_int(battle_id) and validate_int(cockpit) and validate_flight_direction(flight_direction) \
                 and validate_int(sky_size) and 9 < sky_size < 16:
             b = self.battle_dao.get_battle_by_id(battle_id)
             if b.get_challenger_id() == user_id and not b.get_concluded():
@@ -63,11 +63,13 @@ class BattleService:
         if validate_int(defense_size) and validate_int(sky_size) \
                 and validate_array_of_ints(defense) and validate_int(max_time):
             self.battle_dao.conclude_unchallenged_battles(user_id)
-        if self.battle_dao.is_engaged(user_id):
-            raise Forbidden("You are already engaged in another battle")
-        battle = Battle(None, None, user_id,
-                        None, defense, sky_size, None, None, None, None, None, defense_size, None)
-        return self.battle_dao.add_battle(battle, max_time)
+            if not self.user_dao.get_user_by_id(user_id):
+                raise Forbidden("Request rejected!")
+            elif self.battle_dao.is_engaged(user_id):
+                raise Forbidden("You are already engaged in another battle")
+            battle = Battle(None, None, user_id,
+                            None, defense, sky_size, None, None, None, None, None, defense_size, None)
+            return self.battle_dao.add_battle(battle, max_time)
 
     def get_status(self, user_id, battle_id):
         messages = None

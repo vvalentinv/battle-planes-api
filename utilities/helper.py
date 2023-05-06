@@ -2,6 +2,10 @@ import random
 import bcrypt
 
 
+def validate_password(passwd, pw_hash):
+    return bcrypt.checkpw(passwd.encode(), pw_hash.encode())
+
+
 def hash_registering_password(passwd):
     return bcrypt.hashpw(passwd, bcrypt.gensalt())
 

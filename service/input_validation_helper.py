@@ -1,10 +1,5 @@
-import bcrypt
 import re
 from exception.invalid_parameter import InvalidParameter
-
-
-def validate_password(passwd, pw_hash):
-    return bcrypt.checkpw(passwd.encode(), pw_hash.encode())
 
 
 def validate_email(string):
