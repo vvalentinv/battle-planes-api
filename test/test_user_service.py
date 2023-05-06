@@ -38,7 +38,7 @@ def test_add_user_valid_data(mocker):
         return 'User successfully added!'
 
     mocker.patch('dao.user.UserDao.add_user', mock_add_user)
-    # Actual
+    # Act
     actual = user_service.add_user('validUser', 'Password123!!', 'z@a.ca')
     expected = 'User successfully added!'
     # Assert
@@ -81,7 +81,7 @@ def test_update_user_valid_current_password_valid_email(mocker):
 
     mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
     mocker.patch('dao.user.UserDao.check_for_email', mock_check_for_email)
-    # Actual
+    # Act
     actual = user_service.update_user('jcad1', 'Password123!!2', 'Password123!!', 'a1234@a.ca')
     expected = 'Email successfully updated!'
     # Assert
@@ -107,7 +107,7 @@ def test_update_user_valid_current_password_no_email(mocker):
 
     mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
 
-    # Actual
+    # Act
     actual = user_service.update_user('jcad1', 'Password123!!2', 'Password123!!', None)
     expected = 'Password successfully updated!'
     # Assert

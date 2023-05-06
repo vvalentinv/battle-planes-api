@@ -3,7 +3,7 @@ from controller.plane import plane_service
 
 def test_plane_service():
     # Arrange
-    # Actual
+    # Act
     actual = plane_service
     expected = plane_service
     # Assert
