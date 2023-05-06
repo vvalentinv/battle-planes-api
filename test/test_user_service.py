@@ -3,6 +3,7 @@ import pytest
 from controller.user import user_service
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
+from model.user import User
 
 
 def test_check_for_username_existing(mocker):
@@ -43,6 +44,19 @@ def test_add_user_valid_data(mocker):
     # Assert
     assert actual == expected
 
+
+def test_get_user_by_username_invalid_current_password(mocker):
+    # Arrange
+    def mock_get_user_by_username(self, username):
+        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+
+    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    # Act and  # Assert
+    with pytest.raises(Forbidden):
+        user_service.update_user('jcad1', 'Password123!!', 'Password123!!2', 'a@a.ca')
+
+
+# input_validation_helper tests
 
 def test_invalid_username_format_length_3():
     # Arrange
