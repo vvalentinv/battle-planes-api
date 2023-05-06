@@ -63,13 +63,13 @@ class BattleService:
         if validate_int(defense_size) and validate_int(sky_size) \
                 and validate_array_of_ints(defense) and validate_int(max_time):
             self.battle_dao.conclude_unchallenged_battles(user_id)
-        elif not self.user_dao.get_user_by_id(user_id):
-            raise Forbidden("Request rejected!")
-        elif self.battle_dao.is_engaged(user_id):
-            raise Forbidden("You are already engaged in another battle")
-        battle = Battle(None, None, user_id,
-                        None, defense, sky_size, None, None, None, None, None, defense_size, None)
-        return self.battle_dao.add_battle(battle, max_time)
+            if not self.user_dao.get_user_by_id(user_id):
+                raise Forbidden("Request rejected!")
+            elif self.battle_dao.is_engaged(user_id):
+                raise Forbidden("You are already engaged in another battle")
+            battle = Battle(None, None, user_id,
+                            None, defense, sky_size, None, None, None, None, None, defense_size, None)
+            return self.battle_dao.add_battle(battle, max_time)
 
     def get_status(self, user_id, battle_id):
         messages = None

@@ -1,6 +1,7 @@
 import pytest
 
 from controller.battle import battle_service
+from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
 from model.user import User
 
@@ -20,6 +21,17 @@ def test_add_battle_valid_params(mocker):
     expected = 'You have set your defense and waiting for a challenger!'
     # Assert
     assert actual == expected
+
+
+def test_add_battle_invalid_user_id_in_db(mocker):
+    # Arrange
+    def mock_get_user_by_id(self, user_id):
+        return False
+
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden):
+        battle_service.add_battle(-1, [1, 2, 3], 3, 10, 10)
 
 
 def test_add_battle_invalid_int():
