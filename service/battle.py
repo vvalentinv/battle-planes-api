@@ -51,7 +51,7 @@ class BattleService:
             elif battle.get_challenger_id() > 0:
                 raise Forbidden("This player was already challenged.")
             elif battle.get_challenged_id() == user_id:
-                raise InvalidParameter("Players cannot challenge themselves")
+                raise Forbidden("Players cannot challenge themselves")
             elif self.battle_dao.is_concluded(battle_id):
                 return "This battle was concluded"
             elif battle.get_challenger_id() == 0 and self.battle_dao.is_time_left(battle_id):
