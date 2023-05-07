@@ -53,10 +53,10 @@ class BattleService:
             elif battle.get_challenged_id() == user_id:
                 raise Forbidden("Players cannot challenge themselves")
             elif self.battle_dao.is_concluded(battle_id):
-                return "This battle was concluded"
+                raise InvalidParameter("This battle was concluded")
             elif battle.get_challenger_id() == 0 and self.battle_dao.is_time_left(battle_id):
                 return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
-            return "Timeframe for challenge just elapsed"
+            raise InvalidParameter("Timeframe for challenge just elapsed")
 
     def add_battle(self, user_id, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \
