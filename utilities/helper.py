@@ -148,3 +148,19 @@ def evaluate_attack(attacks, planes):
         print(planes_health_list)
         messages.append("Battle won by last attack!")
     return messages
+
+
+def validate_defense(plane, planes):
+    if len(planes) == 0:
+        return True
+    for p in planes:
+        if plane.get_cockpit() == p.get_cockpit() or plane.get_cockpit() in p.get_body():
+            return False
+        elif p.get_cockpit() in plane.get_body():
+            return False
+        elif bool(set(plane.get_body()) & set(p.get_body())):
+            return False
+    else:
+        return True
+
+

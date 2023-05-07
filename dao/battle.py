@@ -18,9 +18,10 @@ class BattleDao:
                 b = cur.fetchone()
                 if b:
                     battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
-                    if battle.get_defense_size() == len(battle.get_challenger_defense()):
+                    curr_def = battle.get_challenger_defense() or []
+                    if battle.get_defense_size() == len(curr_def):
                         return "Defense setup complete!"
-                    return f"{battle.get_defense_size() - len(battle.get_challenger_defense())} more plane(s) to add " \
+                    return f"{battle.get_defense_size() - len(curr_def)} more plane(s) to add " \
                            f"until defense setup is complete."
                 return None
 
@@ -54,8 +55,8 @@ class BattleDao:
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) VALUES	"
-                    "(0, %s, %s, False, Now() + '%s MINUTE') returning *",
+                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) "
+                    "VALUES	(0, %s, %s, False, Now() + '%s MINUTE') returning *",
                     (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
                 b = cur.fetchone()
                 if b:

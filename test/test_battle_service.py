@@ -199,6 +199,12 @@ def test_start_battle_valid_user_id_valid_battle_time_elapsed(mocker):
     assert str(e.value) == 'Timeframe for challenge just elapsed'
 
 
+def test_add_plane_to_battle_defense_by_challenger_valid_ints():
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.add_plane_to_battle_defense_by_challenger(1, 2, 3, 4, 30)
+    assert str(e.value) == 'Battlefield size is between 10 and 15 inclusive.'
+
 # input_validation_helper tests
 def test_add_battle_invalid_int():
     # Act and # Assert

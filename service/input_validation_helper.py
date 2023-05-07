@@ -1,3 +1,4 @@
+import numbers
 import re
 from exception.invalid_parameter import InvalidParameter
 
@@ -66,9 +67,11 @@ def validate_username(string):
 
 
 def validate_int(number):
-    if str(number).isnumeric() and number >= 0 and number // 1 == number / 1:
+    print(number)
+    if not str(number).isdigit():
+        raise InvalidParameter("Not a positive int")
+    else:
         return True
-    raise InvalidParameter("Not a positive int")
 
 
 def validate_flight_direction(direction):

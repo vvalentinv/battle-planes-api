@@ -4,7 +4,8 @@ from dao.user import UserDao
 from exception.forbidden import Forbidden
 from model.battle import Battle
 from service.input_validation_helper import validate_int, validate_flight_direction, validate_array_of_ints
-from utilities.helper import random_automatic_attack, evaluate_attack, evaluate_disconnect, check_progress
+from utilities.helper import random_automatic_attack, evaluate_attack, evaluate_disconnect, check_progress, \
+    validate_defense
 from exception.invalid_parameter import InvalidParameter
 
 
@@ -18,26 +19,28 @@ class BattleService:
         if validate_int(battle_id) and validate_int(cockpit) and validate_flight_direction(flight_direction) \
                 and validate_int(sky_size) and 9 < sky_size < 16:
             b = self.battle_dao.get_battle_by_id(battle_id)
-            if b.get_challenger_id() == user_id and not b.get_concluded():
-                plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
-                if plane_id is not None:
-                    plane_ids = set()
-                    if b.get_challenger_defense() is not None:
-                        plane_ids = set(b.get_challenger_defense())
-                    old_def_size = len(plane_ids)
-                    plane_ids.add(plane_id)
-                    if len(plane_ids) > old_def_size:
-                        if b.get_defense_size() - len(plane_ids) >= 0 \
-                                and self.battle_dao.is_time_left(b.get_battle_id()):
-                            return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, list(plane_ids))
-                        elif not self.battle_dao.is_time_left(b.get_battle_id()):
-                            return "Time frame to add planes for defense setup elapsed."
-                        else:
-                            return "Maximum defense size reached."
-                    else:
-                        return "Invalid selection"
-            elif b.get_concluded():
-                return "Invalid battle"
+            if b is None:
+                raise InvalidParameter("Request rejected1")
+            existing_defense = b.get_challenger_defense() or []
+            print(existing_defense)
+            if b.get_defense_size() <= len(existing_defense):
+                raise InvalidParameter("Request rejected2")
+            elif not user_id == b.get_challenger_id():
+                raise Forbidden("Request rejected3")
+            plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
+            print(plane_id)
+            if not plane_id:
+                raise InvalidParameter("Invalid selection")
+            planes = []
+            if len(existing_defense) > 0:
+                for plane_id in b.get_challenger_defense():
+                    planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            if not validate_defense(self.plane_dao.get_plane_by_plane_id(plane_id), planes):
+                raise Forbidden("Overlapping planes")
+            if not self.battle_dao.is_time_left(b.get_battle_id()):
+                raise Forbidden("Time frame to add planes for defense setup elapsed.")
+            existing_defense.append(plane_id)
+            return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, existing_defense)
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
@@ -169,10 +172,10 @@ class BattleService:
         check_opponents_overall_progress = False
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
-            # check if it's challenger's turn (attack fields have same lengths
+            # check if it"s challenger"s turn (attack fields have same lengths
             if attack in cr_attacks:
                 raise InvalidParameter("Attack already used")
-            # challenged player's turn
+            # challenged player"s turn
             elif len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
