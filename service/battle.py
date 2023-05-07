@@ -45,19 +45,18 @@ class BattleService:
         if self.battle_dao.is_engaged(user_id):
             raise Forbidden("You are already engaged in another battle")
         if validate_int(battle_id):
-            pass
-        battle = self.battle_dao.get_battle_by_id(battle_id)
-        if battle is None:
-            raise InvalidParameter("Request rejected")
-        elif battle.get_challenger_id() > 0:
-            raise Forbidden("This player was already challenged.")
-        elif battle.get_challenged_id() == user_id:
-            raise InvalidParameter("Players cannot challenge themselves")
-        elif self.battle_dao.is_concluded(battle_id):
-            return "This battle was concluded"
-        elif battle.get_challenger_id() == 0 and self.battle_dao.is_time_left(battle_id):
-            return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
-        return "Timeframe for challenge just elapsed"
+            battle = self.battle_dao.get_battle_by_id(battle_id)
+            if battle is None:
+                raise InvalidParameter("Request rejected")
+            elif battle.get_challenger_id() > 0:
+                raise Forbidden("This player was already challenged.")
+            elif battle.get_challenged_id() == user_id:
+                raise InvalidParameter("Players cannot challenge themselves")
+            elif self.battle_dao.is_concluded(battle_id):
+                return "This battle was concluded"
+            elif battle.get_challenger_id() == 0 and self.battle_dao.is_time_left(battle_id):
+                return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
+            return "Timeframe for challenge just elapsed"
 
     def add_battle(self, user_id, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \
