@@ -73,7 +73,7 @@ def test_start_battle_valid_user_id_user_invalid_battle_id(mocker):
     # Act and # Assert
     with pytest.raises(InvalidParameter) as e:
         battle_service.start_battle_by_challenger(2, 'a12')
-    assert str(e.value) == 'Expected digits only in a number'
+    assert str(e.value) == 'Not a positive int'
 
 
 def test_start_battle_valid_user_id_user_invalid_battle_id_in_db(mocker):
@@ -131,7 +131,7 @@ def test_add_battle_invalid_int():
     # Act and # Assert
     with pytest.raises(InvalidParameter) as e:
         battle_service.add_battle(1, [1, 2, 3], '2s', 10, 10)
-    assert str(e.value) == 'Expected digits only in a number'
+    assert str(e.value) == 'Not a positive int'
 
 
 def test_add_plane_to_battle_defense_invalid_flight_direction():

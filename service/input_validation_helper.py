@@ -66,11 +66,9 @@ def validate_username(string):
 
 
 def validate_int(number):
-    reg_invalid_character = r"[^0-9]"
-    number = str(number)
-    if re.findall(reg_invalid_character, number):
-        raise InvalidParameter("Expected digits only in a number")
-    return True
+    if str(number).isnumeric() and number >= 0 and number // 1 == number / 1:
+        return True
+    raise InvalidParameter("Not a positive int")
 
 
 def validate_flight_direction(direction):
