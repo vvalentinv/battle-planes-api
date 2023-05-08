@@ -1,3 +1,4 @@
+import numbers
 import re
 from exception.invalid_parameter import InvalidParameter
 
@@ -66,10 +67,8 @@ def validate_username(string):
 
 
 def validate_int(number):
-    reg_invalid_character = r"[^0-9]"
-    number = str(number)
-    if re.findall(reg_invalid_character, number):
-        raise InvalidParameter("Expected digits only in a number")
+    if not str(number).isdigit():
+        raise InvalidParameter("Not a positive int")
     return True
 
 
