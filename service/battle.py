@@ -20,21 +20,19 @@ class BattleService:
                 and validate_int(sky_size) and 9 < sky_size < 16:
             b = self.battle_dao.get_battle_by_id(battle_id)
             if b is None:
-                raise InvalidParameter("Request rejected1")
+                raise InvalidParameter("Request rejected")
             existing_defense = b.get_challenger_defense() or []
-            print(existing_defense)
             if b.get_defense_size() <= len(existing_defense):
-                raise InvalidParameter("Request rejected2")
+                raise InvalidParameter("Request rejected")
             elif not user_id == b.get_challenger_id():
-                raise Forbidden("Request rejected3")
+                raise Forbidden("Request rejected")
             plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
-            print(plane_id)
             if not plane_id:
                 raise InvalidParameter("Invalid selection")
             planes = []
             if len(existing_defense) > 0:
-                for plane_id in b.get_challenger_defense():
-                    planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+                for p_id in existing_defense:
+                    planes.append(self.plane_dao.get_plane_by_plane_id(p_id))
             if not validate_defense(self.plane_dao.get_plane_by_plane_id(plane_id), planes):
                 raise Forbidden("Overlapping planes")
             if not self.battle_dao.is_time_left(b.get_battle_id()):

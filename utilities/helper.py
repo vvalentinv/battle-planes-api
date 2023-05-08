@@ -127,8 +127,6 @@ def evaluate_attack(attacks, planes):
         for i in p.get_body():
             plane_health.append(i)
         planes_health_list.append(plane_health)
-    print("initial")
-    print(planes_health_list)
     for a in attacks:
         for p in planes_health_list:
             if p[0] == a:
@@ -143,9 +141,7 @@ def evaluate_attack(attacks, planes):
                 break
         else:
             messages.append((a, "Miss"))
-    print(planes_health_list)
     if not planes_health_list or {len(i[1]) for i in planes_health_list} == 0:
-        print(planes_health_list)
         messages.append("Battle won by last attack!")
     return messages
 
@@ -153,12 +149,11 @@ def evaluate_attack(attacks, planes):
 def validate_defense(plane, planes):
     if len(planes) == 0:
         return True
+    cockpit = plane.get_cockpit()
+    body = plane.get_body()
     for p in planes:
-        if plane.get_cockpit() == p.get_cockpit() or plane.get_cockpit() in p.get_body():
-            return False
-        elif p.get_cockpit() in plane.get_body():
-            return False
-        elif bool(set(plane.get_body()) & set(p.get_body())):
+        if cockpit == p.get_cockpit() or cockpit in p.get_body()[0] or \
+                p.get_cockpit() in body[0] or bool(set(body[0]) & set(p.get_body()[0])):
             return False
     else:
         return True

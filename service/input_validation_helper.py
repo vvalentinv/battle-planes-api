@@ -67,11 +67,9 @@ def validate_username(string):
 
 
 def validate_int(number):
-    print(number)
     if not str(number).isdigit():
         raise InvalidParameter("Not a positive int")
-    else:
-        return True
+    return True
 
 
 def validate_flight_direction(direction):

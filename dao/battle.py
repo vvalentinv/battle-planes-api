@@ -101,7 +101,6 @@ class BattleDao:
                     return found[0]
 
     def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        print(attacks)
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
