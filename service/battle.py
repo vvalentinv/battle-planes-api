@@ -20,12 +20,12 @@ class BattleService:
                 and validate_int(sky_size) and 9 < sky_size < 16:
             b = self.battle_dao.get_battle_by_id(battle_id)
             if b is None:
-                raise InvalidParameter("Request rejected")
+                raise InvalidParameter("Request rejected1")
             existing_defense = b.get_challenger_defense() or []
             if b.get_defense_size() <= len(existing_defense):
-                raise InvalidParameter("Request rejected")
+                raise InvalidParameter("Request rejected2")
             elif not user_id == b.get_challenger_id():
-                raise Forbidden("Request rejected")
+                raise Forbidden("Request rejected3")
             plane_id = self.plane_dao.get_plane_id(cockpit, flight_direction, sky_size)
             if not plane_id:
                 raise InvalidParameter("Invalid selection")
@@ -38,7 +38,7 @@ class BattleService:
             if not self.battle_dao.is_time_left(b.get_battle_id()):
                 raise Forbidden("Time frame to add planes for defense setup elapsed.")
             existing_defense.append(plane_id)
-            return self.battle_dao.add_plane_to_battle_defense_by_username(battle_id, existing_defense)
+            return self.battle_dao.add_planes_to_battle_defense_by_username(battle_id, existing_defense)
         else:
             raise InvalidParameter("Battlefield size is between 10 and 15 inclusive.")
 
@@ -89,7 +89,7 @@ class BattleService:
         cr_rnd_attacks = b.get_rnd_attack_er() or []
         cd_rnd_attacks = b.get_rnd_attack_ed() or []
         # conclude unfinished defense setups
-        if b.get_challenger_id() and not len(cr_defense) == len(cd_defense) \
+        if (b.get_challenger_id() or not len(cr_defense) == len(cd_defense)) \
                 and not self.battle_dao.is_time_left(battle_id):
             self.battle_dao.conclude_unfinished_battle(battle_id)
         elif user_id == b.get_challenger_id():
