@@ -377,6 +377,34 @@ def test_get_status_valid_battle_id_valid_in_db_concluded_battle(mocker):
     assert str(e.value) == 'Use battle history'
 
 
+def test_get_status_unfinished_def_setup(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 1, 2,
+                      [1], [1, 2, 3], 10, None, None, None, None, None, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = None, None, None
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenger_on_challenger_turn_in_time(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1,
+                      [1, 2, 3], [1, 2, 3], 10, None, None, None, None, None, 3, True)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(2, 12)
+    expected = [], [None, [1, 2, 3], None], 'This is your turn to attack.'
+    # Assert
+    assert actual == expected
+
+
 # input_validation_helper tests
 def test_add_battle_invalid_int():
     # Act and # Assert
