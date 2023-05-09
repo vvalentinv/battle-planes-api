@@ -100,7 +100,7 @@ class BattleService:
             messages = evaluate_attack(cr_attacks, planes)
             if len(cr_attacks) == len(cd_attacks) and b.get_battle_turn():
                 turn = "This is your turn to attack."
-            elif len(cr_attacks) == len(cd_attacks) + 1 and b.get_battle_turn():
+            elif len(cr_attacks) == len(cd_attacks) + 1:
                 turn = "Wait for your opponent's attack."
                 check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
@@ -128,7 +128,7 @@ class BattleService:
             messages = evaluate_attack(cd_attacks, planes)
             if len(cr_attacks) == len(cd_attacks) + 1 and b.get_battle_turn():
                 turn = "This is your turn to attack."
-            elif len(cr_attacks) == len(cd_attacks) and b.get_battle_turn():
+            elif len(cr_attacks) == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
                 check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):

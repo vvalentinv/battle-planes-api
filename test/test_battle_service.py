@@ -405,6 +405,20 @@ def test_get_status_challenger_on_challenger_turn_in_time(mocker):
     assert actual == expected
 
 
+def test_get_status_challenger_on_challenged_turn_false_progress_false_disconnect(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1,
+                      [1, 2, 3], [1, 2, 3], 10, [77], None, None, None, None, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(2, 12)
+    expected = [(77, 'Miss')], [[77], [1, 2, 3], None], "Wait for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
 # input_validation_helper tests
 def test_add_battle_invalid_int():
     # Act and # Assert
