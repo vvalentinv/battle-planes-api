@@ -121,6 +121,8 @@ def check_progress(attacks, planes, def_size):
 
 def evaluate_attack(attacks, planes):
     messages = []
+    if not attacks:
+        return messages
     planes_health_list = []
     for p in planes:
         plane_health = [p.get_cockpit()]

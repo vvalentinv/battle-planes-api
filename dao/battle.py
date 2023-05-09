@@ -8,7 +8,7 @@ load_dotenv()
 
 class BattleDao:
 
-    def add_plane_to_battle_defense_by_username(self, battle_id, planes_array):
+    def add_planes_to_battle_defense_by_username(self, battle_id, planes_array):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
