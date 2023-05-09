@@ -345,6 +345,38 @@ def test_add_plane_to_battle_defense_by_challenger_def_length_0_in_time(mocker):
     assert actual == expected
 
 
+def test_get_status_invalid_battle_id(mocker):
+    # Arrange
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.get_status(1, -3)
+    assert str(e.value) == 'Not a positive int'
+
+
+def test_get_status_valid_battle_id_invalid_in_db(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return None
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.get_status(1, 12)
+    assert str(e.value) == 'Request rejected'
+
+
+def test_get_status_valid_battle_id_valid_in_db_concluded_battle(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 1, 2, [1, 2, 3], [1, 2, 3], 10, None, None, None, None, True, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.get_status(1, 12)
+    assert str(e.value) == 'Use battle history'
+
+
 # input_validation_helper tests
 def test_add_battle_invalid_int():
     # Act and # Assert
