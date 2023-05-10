@@ -70,9 +70,11 @@ class BattleDao:
             with conn.cursor() as cur:
                 cur.execute("SELECT (SELECT challenger_id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
+                            "AND Now() < battle_turn + interval '15 MINUTE' "
                             "UNION "
-                            "SELECT challenged_id FROM battles WHERE concluded IS False AND challenged_id = %s AND "
-                            "challenger_id <> 0 ) "
+                            "SELECT challenged_id FROM battles "
+                            "WHERE concluded IS False AND challenged_id = %s AND "
+                            "challenger_id <> 0 AND Now() < battle_turn + interval '15 MINUTE') "
                             " = %s", (user_id, user_id, user_id))
                 found = cur.fetchone()
                 if found and found[0]:
