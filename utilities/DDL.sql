@@ -50,8 +50,8 @@ CREATE TABLE battles(
 INSERT INTO users (id, username, pass, email) VALUES (0, 'default-challenger', '', '');
 INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4, 'West');
 
-INSERT INTO battles (challenged_id, challenged_defense, concluded, battle_turn) VALUES 
-					(0, array[1,2,3], False, Now());
+INSERT INTO battles (challenger_id, challenged_id, challenger_defense, challenged_defense, challenger_attacks, challenged_attacks, rnd_attack_ed, concluded, battle_turn) VALUES 
+					(2, 1, array[1,2,3], array[1,2,3], array[0, 9, 90, 99], array[0, 9, 90, 99], array[0, 9, 90, 99], False, Now() + interval '3 MINUTE');
 update battles set concluded  = true  WHERE id = 1;
 SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
 select (Select battle_turn from battles b Where id = 6) > Now();
@@ -68,10 +68,10 @@ delete from battles;
 
 SELECT (SELECT challenger_id 
 		FROM battles
-        WHERE concluded IS False AND challenger_id = 2
+        WHERE concluded IS False AND challenger_id = 2 AND Now() < battle_turn + interval '15 MINUTE'   
 		UNION
      	SELECT challenged_id 
      	FROM battles 
-     	WHERE concluded IS False AND challenged_id = 2 AND challenger_id <> 0 )
+     	WHERE concluded IS False AND challenged_id = 2 AND challenger_id <> 0 AND Now() < battle_turn + interval '15 MINUTE' )
      	 = 2;
 
