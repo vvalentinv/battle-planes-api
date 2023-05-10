@@ -81,7 +81,7 @@ def get_battle_status(battle_id):
 @bc.route('/battles/<battle_id>/attacks', methods=['PUT'])
 def update_battle(battle_id):
     # Returns 3 possible messages based choice and its effects on opponents defense (Hit, Miss, Kill)
-    user_id = 1
+    user_id = 2
     r_body = request.get_json()
     try:
         attack = r_body.get('attack', None)

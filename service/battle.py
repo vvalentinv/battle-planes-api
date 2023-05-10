@@ -97,15 +97,20 @@ class BattleService:
             planes = []
             for plane_id in b.get_challenged_defense():
                 planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in b.get_challenger_defense():
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages = evaluate_attack(cr_attacks, planes)
             if len(cr_attacks) == len(cd_attacks) and b.get_battle_turn():
                 turn = "This is your turn to attack."
-            elif len(cr_attacks) == len(cd_attacks) + 1:
+            elif len(cr_attacks) - 1 == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
                 check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
-                if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
+                print(check_opponent_overall_progress)
+                if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress) \
+                        and not check_progress(cr_attacks, my_planes, b.get_defense_size()):
                     self.battle_dao.conclude_unfinished_battle(battle_id)
-                    return "Battle inconclusive by player disconnect."
+                    return "Battle inconclusive by opponent disconnect."
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) and not b.get_battle_turn():
                 attack = random_automatic_attack(cr_attacks, b.get_sky_size())
@@ -125,13 +130,17 @@ class BattleService:
             planes = []
             for plane_id in b.get_challenger_defense():
                 planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in b.get_challenged_defense():
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages = evaluate_attack(cd_attacks, planes)
             if len(cr_attacks) == len(cd_attacks) + 1 and b.get_battle_turn():
                 turn = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
                 check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
-                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):
+                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress)\
+                        and not check_progress(cd_attacks, my_planes, b.get_defense_size()):
                     self.battle_dao.conclude_unfinished_battle(battle_id)
                     return "Battle inconclusive by player disconnect."
             # perform auto attack if turn expired
