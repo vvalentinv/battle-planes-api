@@ -1,3 +1,5 @@
+import datetime
+
 from dotenv import load_dotenv
 import os
 from model.battle import Battle
@@ -46,7 +48,10 @@ class BattleDao:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
                 b = cur.fetchone()
                 if b:
-                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
+                    if b[12] > datetime.datetime.now():
+                        return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], True)
+                    else:
+                        return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], False)
                 return None
 
     def add_battle(self, battle, max_time):
