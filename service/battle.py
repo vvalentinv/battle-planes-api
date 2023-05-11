@@ -119,7 +119,8 @@ class BattleService:
                 self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
                 turn = "Failed to attack -> system attack. Wait for your opponent's attack."
                 battle = self.battle_dao.get_battle_by_id(battle_id)
-                data = [battle.get_challenger_attacks(), battle.get_challenger_defense(), battle.get_challenged_attacks()]
+                data = [battle.get_challenger_attacks(), battle.get_challenger_defense(),
+                        battle.get_challenged_attacks()]
                 planes = []
                 for plane_id in battle.get_challenged_defense():
                     planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
@@ -150,12 +151,13 @@ class BattleService:
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
                 self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
                 turn = "Failed to attack -> system attack. Wait for your opponent's attack."
-                b = self.battle_dao.get_battle_by_id(battle_id)
-                data = [b.get_challenger_attacks(), b.get_challenger_defense(), b.get_challenged_attacks()]
+                battle = self.battle_dao.get_battle_by_id(battle_id)
+                data = [battle.get_challenged_attacks(), battle.get_challenged_defense(),
+                        battle.get_challenger_attacks()]
                 planes = []
-                for plane_id in b.get_challenged_defense():
+                for plane_id in battle.get_challenger_defense():
                     planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-                messages = evaluate_attack(cr_attacks, planes)
+                messages = evaluate_attack(cd_attacks, planes)
         else:
             raise Forbidden("This battle is private.")
         return messages, data, turn

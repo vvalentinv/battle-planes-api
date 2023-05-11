@@ -117,7 +117,6 @@ class BattleDao:
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
-                    print(inserted_user)
                     return True
                 return None
 
