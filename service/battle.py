@@ -173,7 +173,7 @@ class BattleService:
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
         if not cr == user_id and not cd == user_id:
-            raise Forbidden("Request rejected. not playing")
+            raise Forbidden("Request rejected")
         cr_attacks = b.get_challenger_attacks() or []
         cd_attacks = b.get_challenged_attacks() or []
         cr_rnd_attacks = b.get_rnd_attack_er() or []
@@ -187,7 +187,6 @@ class BattleService:
         cd_planes = []
         for plane_id in cr_defense:
             cd_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-        check_opponents_overall_progress = False
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
