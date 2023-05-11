@@ -168,12 +168,12 @@ class BattleService:
         b = self.battle_dao.get_battle_by_id(battle_id)
         if b is None or b.get_concluded():
             raise Forbidden("Request rejected")
-        not_rand = self.battle_dao.is_time_left(battle_id)
-        sky = b.get_sky_size()
-        if attack not in range(sky * sky):
+        if attack not in range(b.get_sky_size() * b.get_sky_size()):
             raise InvalidParameter("Invalid parameter(s).")
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
+        if not cr == user_id and not cd == user_id:
+            raise Forbidden("Request rejected")
         cr_attacks = b.get_challenger_attacks() or []
         cd_attacks = b.get_challenged_attacks() or []
         cr_rnd_attacks = b.get_rnd_attack_er() or []
@@ -187,9 +187,6 @@ class BattleService:
         cd_planes = []
         for plane_id in cr_defense:
             cd_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-        if not cr == user_id and not cd == user_id and cr == 0:
-            raise Forbidden("Request rejected. not playing")
-        check_opponents_overall_progress = False
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
@@ -199,11 +196,11 @@ class BattleService:
             elif len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
-                if not not_rand:
+                if not b.get_battle_turn():
                     attack = random_automatic_attack(cr_attacks, b.get_sky_size())
                     cr_rnd_attacks.append(attack)
                 cr_attacks.append(attack)
-            if not_rand:
+            if b.get_battle_turn():
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
             else:
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
@@ -224,11 +221,11 @@ class BattleService:
             elif len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Wait for your turn.")
             elif len(cr_attacks) > len(cd_attacks) and attack not in cd_attacks:
-                if not not_rand:
+                if not b.get_battle_turn():
                     attack = random_automatic_attack(cd_attacks, b.get_sky_size())
                     cd_rnd_attacks.append(attack)
                 cd_attacks.append(attack)
-            if not_rand:
+            if b.get_battle_turn():
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
             else:
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)

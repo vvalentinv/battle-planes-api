@@ -570,10 +570,11 @@ def test_get_status_challenged_on_challenged_turn_false_not_in_time(mocker):
 
     m = Mock()
     m.side_effect = [Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80],
-                      [78, 79, 80], None, None, False, 3, False),
+                            [78, 79, 80], None, None, False, 3, False),
                      Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80],
                             [78, 79, 80, 23], None, None, False, 3, False)
                      ]
+
     def mock_get_battle_by_id(self, battle_id):
         return m()
 
@@ -602,6 +603,53 @@ def test_get_status_non_challenger_or_challenged_id(mocker):
     with pytest.raises(Forbidden) as e:
         battle_service.get_status(3, 12)
     assert str(e.value) == 'This battle is private.'
+
+
+def test_battle_update_invalid_battle_id_in_db(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return None
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.battle_update(2, 12, 21)
+    assert str(e.value) == 'Request rejected'
+
+
+def test_battle_update_valid_battle_id_concluded_true(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, True, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.battle_update(2, 12, 21)
+    assert str(e.value) == 'Request rejected'
+
+
+def test_battle_update_valid_battle_id_invalid_attack(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.battle_update(2, 12, 100)
+    assert str(e.value) == 'Invalid parameter(s).'
+
+
+def test_battle_update_valid_battle_id_invalid_user_id(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.battle_update(3, 12, 99)
+    assert str(e.value) == 'Request rejected'
 
 
 # input_validation_helper tests
