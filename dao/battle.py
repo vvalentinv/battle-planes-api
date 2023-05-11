@@ -1,3 +1,5 @@
+import datetime
+
 from dotenv import load_dotenv
 import os
 from model.battle import Battle
@@ -46,7 +48,10 @@ class BattleDao:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
                 b = cur.fetchone()
                 if b:
-                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
+                    if b[12] > datetime.datetime.now():
+                        return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], True)
+                    else:
+                        return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], False)
                 return None
 
     def add_battle(self, battle, max_time):
@@ -70,9 +75,11 @@ class BattleDao:
             with conn.cursor() as cur:
                 cur.execute("SELECT (SELECT challenger_id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
+                            "AND Now() < battle_turn + interval '15 MINUTE' "
                             "UNION "
-                            "SELECT challenged_id FROM battles WHERE concluded IS False AND challenged_id = %s AND "
-                            "challenger_id <> 0 ) "
+                            "SELECT challenged_id FROM battles "
+                            "WHERE concluded IS False AND challenged_id = %s AND "
+                            "challenger_id <> 0 AND Now() < battle_turn + interval '15 MINUTE') "
                             " = %s", (user_id, user_id, user_id))
                 found = cur.fetchone()
                 if found and found[0]:
@@ -110,7 +117,6 @@ class BattleDao:
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
-                    print(inserted_user)
                     return True
                 return None
 

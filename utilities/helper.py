@@ -85,11 +85,14 @@ def random_automatic_attack(attacks, sky_size):
 def evaluate_disconnect(attacks, rnd_attacks, check_opponents_overall_progress):
     attacks_str = ''.join(str(e) for e in attacks)
     rnd_attacks_str = ''.join(str(e) for e in rnd_attacks)
-    if check_opponents_overall_progress:
+    print(attacks_str)
+    print(rnd_attacks_str)
+    print(len(rnd_attacks))
+
+
+    if check_opponents_overall_progress or len(rnd_attacks) < 4:
         return False
-    elif rnd_attacks_str in attacks_str and len(rnd_attacks_str) < 4:
-        return False
-    else:
+    elif rnd_attacks_str in attacks_str and len(rnd_attacks) == 4:
         return True
 
 
@@ -113,6 +116,7 @@ def check_progress(attacks, planes, def_size):
     for body in bodies_list:
         if not body:
             counter += 1
+    print(counter)
     if counter * 100 / def_size > 66.6:
         return True
     else:
