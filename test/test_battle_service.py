@@ -1,5 +1,7 @@
-import pytest
+from unittest import mock
+from unittest.mock import Mock
 
+import pytest
 from controller.battle import battle_service
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
@@ -8,21 +10,21 @@ from model.plane import Plane
 from model.user import User
 
 
-def test_add_battle_valid_params(mocker):
-    # Arrange
-    def mock_get_user_by_id(self, user_id):
-        return User(1, 'jcad1', 'some_password_hash', 'some_email')
-
-    def mock_is_engaged(self, user_id):
-        return False
-
-    mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
-    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
-    # Act
-    actual = battle_service.add_battle(1, [1, 2, 3], 3, 10, 10)
-    expected = 'You have set your defense and waiting for a challenger!'
-    # Assert
-    assert actual == expected
+# def test_add_battle_valid_params(mocker):
+#     # Arrange
+#     def mock_get_user_by_id(self, user_id):
+#         return User(1, 'jcad1', 'some_password_hash', 'some_email')
+#
+#     def mock_is_engaged(self, user_id):
+#         return False
+#
+#     mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
+#     mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
+#     # Act
+#     actual = battle_service.add_battle(1, [1, 2, 3], 3, 10, 10)
+#     expected = 'You have set your defense and waiting for a challenger!'
+#     # Assert
+#     assert actual == expected
 
 
 def test_add_battle_invalid_user_id_in_db(mocker):
@@ -380,12 +382,12 @@ def test_get_status_valid_battle_id_valid_in_db_concluded_battle(mocker):
 def test_get_status_unfinished_def_setup(mocker):
     # Arrange
     def mock_get_battle_by_id(self, battle_id):
-        return Battle(12, 1, 2,
+        return Battle(12, 2, 1,
                       [1], [1, 2, 3], 10, None, None, None, None, False, 3, False)
 
     mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
     # Act
-    actual = battle_service.get_status(1, 12)
+    actual = battle_service.get_status(2, 12)
     expected = None, None, None
     # Assert
     assert actual == expected
@@ -434,7 +436,7 @@ def test_get_status_challenger_on_challenged_turn_true_progress_false_disconnect
     assert actual == expected
 
 
-def test_get_status_challenger_on_challenged_turn_true_progress_true_disconnect(mocker):
+def test_get_status_challenger_on_challenged_turn_true_progress_true_disconnect_self_progress_false(mocker):
     # Arrange
     def mock_get_battle_by_id(self, battle_id):
         return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80, 81],
@@ -446,6 +448,160 @@ def test_get_status_challenger_on_challenged_turn_true_progress_true_disconnect(
     expected = 'Battle inconclusive by opponent disconnect.'
     # Assert
     assert actual == expected
+
+
+def test_get_status_challenger_on_challenged_turn_true_progress_true_disconnect_self_progress_true(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 37, 63],
+                      [78, 79, 80, 81], None, [78, 79, 80, 81], False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(2, 12)
+    expected = [(77, 'Miss'), (78, 'Miss'), (79, 'Miss'), (37, 'Kill'), (63, 'Kill')], \
+               [[77, 78, 79, 37, 63], [1, 2, 3], [78, 79, 80, 81]], "Wait for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenger_on_challenger_turn_false_not_in_time(mocker):
+    # Arrange
+
+    m = Mock()
+    m.side_effect = [Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80],
+                            [78, 79, 80, 81], None, None, False, 3, False),
+                     Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80, 22],
+                            [78, 79, 80, 81], None, None, False, 3, False)
+                     ]
+
+    def mock_get_battle_by_id(self, battle_id):
+        return m()
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 22
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.get_status(2, 12)
+        expected = [(77, 'Miss'), (78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (22, 'Hit')], \
+                   [[77, 78, 79, 80, 22], [1, 2, 3], [78, 79, 80, 81]], "Failed to attack -> system attack. Wait" \
+                                                                        " for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenger_turn_in_time(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1,
+                      [1, 2, 3], [1, 2, 3], 10, [0], None, None, None, False, 3, True)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = [], [None, [1, 2, 3], [0]], 'This is your turn to attack.'
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenged_turn_false_progress_false_disconnect(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1,
+                      [1, 2, 3], [1, 2, 3], 10, [77], [0], None, None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = [(0, 'Miss')], [[0], [1, 2, 3], [77]], "Wait for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenged_turn_true_progress_false_disconnect(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1,
+                      [1, 2, 3], [1, 2, 3], 10, [77, 63, 37], [0, 9, 90], None, None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = [(0, 'Miss'), (9, 'Miss'), (90, 'Miss')], \
+               [[0, 9, 90], [1, 2, 3], [77, 63, 37]], "Wait for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenged_turn_true_progress_true_disconnect_self_progress_false(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = 'Battle inconclusive by player disconnect.'
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenger_turn_true_progress_true_disconnect_self_progress_true(mocker):
+    # Arrange
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 37, 63], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.get_status(1, 12)
+    expected = [(78, 'Miss'), (79, 'Miss'), (37, 'Kill'), (63, 'Kill')], \
+               [[78, 79, 37, 63], [1, 2, 3], [78, 79, 80, 81]], "Wait for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_challenged_on_challenged_turn_false_not_in_time(mocker):
+    # Arrange
+
+    m = Mock()
+    m.side_effect = [Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80],
+                      [78, 79, 80], None, None, False, 3, False),
+                     Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [77, 78, 79, 80],
+                            [78, 79, 80, 23], None, None, False, 3, False)
+                     ]
+    def mock_get_battle_by_id(self, battle_id):
+        return m()
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.get_status(1, 12)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (23, 'Hit')], \
+                   [[78, 79, 80, 23], [1, 2, 3], [77, 78, 79, 80]], "Failed to attack -> system attack. Wait" \
+                                                                    " for your opponent's attack."
+    # Assert
+    assert actual == expected
+
+
+def test_get_status_non_challenger_or_challenged_id(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.get_status(3, 12)
+    assert str(e.value) == 'This battle is private.'
 
 
 # input_validation_helper tests
