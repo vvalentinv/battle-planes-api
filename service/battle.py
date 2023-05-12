@@ -190,11 +190,11 @@ class BattleService:
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
-            if attack in cr_attacks:
+            if attack in cr_attacks and not len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             # challenged player"s turn
             elif len(cr_attacks) > len(cd_attacks):
-                raise InvalidParameter("Wait for your turn.")
+                raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
                 if not b.get_battle_turn():
                     attack = random_automatic_attack(cr_attacks, b.get_sky_size())
@@ -212,7 +212,7 @@ class BattleService:
             if messages[-1] == "Battle won by last attack!":
                 self.battle_dao.conclude_won_battle(battle_id)
         else:
-            if attack in cd_attacks:
+            if attack in cd_attacks and not len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             elif len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Wait for your turn.")
