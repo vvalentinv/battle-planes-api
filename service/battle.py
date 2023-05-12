@@ -174,6 +174,7 @@ class BattleService:
         cd = b.get_challenged_id()
         if not cr == user_id and not cd == user_id:
             raise Forbidden("Request rejected")
+        messages = None
         cr_attacks = b.get_challenger_attacks() or []
         cd_attacks = b.get_challenged_attacks() or []
         cr_rnd_attacks = b.get_rnd_attack_er() or []
@@ -190,53 +191,49 @@ class BattleService:
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
-            if attack in cr_attacks:
+            if attack in cr_attacks and not len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             # challenged player"s turn
             elif len(cr_attacks) > len(cd_attacks):
-                raise InvalidParameter("Wait for your turn.")
+                raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
                 if not b.get_battle_turn():
                     attack = random_automatic_attack(cr_attacks, b.get_sky_size())
                     cr_rnd_attacks.append(attack)
+                    self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
                 cr_attacks.append(attack)
-            if b.get_battle_turn():
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
-            else:
-                self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
-                self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
             # Next var determines if a battle is finished playing against random attacks or inconclusive by
             # disconnection
-            check_opponent_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
-            if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress):
-                self.battle_dao.conclude_unfinished_battle(battle_id)
-                return "Battle inconclusive by player disconnect."
-            messages = evaluate_attack(cr_attacks, cd_planes)
-            if messages[-1] == "Battle won by last attack!":
-                self.battle_dao.conclude_won_battle(battle_id)
-            return messages
+                messages = evaluate_attack(cr_attacks, cd_planes)
+                check_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
+                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
+                        and not check_progress(cd_attacks, cr_planes, def_size):
+                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    messages.append("Battle inconclusive by player disconnect.")
+                if messages[-1] == "Battle won by last attack!":
+                    self.battle_dao.conclude_won_battle(battle_id)
         else:
-            if attack in cd_attacks:
+            if attack in cd_attacks and not len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             elif len(cr_attacks) == len(cd_attacks):
-                raise InvalidParameter("Wait for your turn.")
+                raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) > len(cd_attacks) and attack not in cd_attacks:
                 if not b.get_battle_turn():
                     attack = random_automatic_attack(cd_attacks, b.get_sky_size())
                     cd_rnd_attacks.append(attack)
+                    self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
                 cd_attacks.append(attack)
-            if b.get_battle_turn():
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
-            else:
-                self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
-                self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
             # Next var determines if a battle is finished playing against random attacks or inconclusive by
             # disconnection
-            check_opponent_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
-            if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress):
-                self.battle_dao.conclude_unfinished_battle(battle_id)
-                return "Battle inconclusive by player disconnect."
-            messages = evaluate_attack(cd_attacks, cr_planes)
-            if messages[-1] == "Battle won by last attack!":
-                self.battle_dao.conclude_won_battle(battle_id)
-            return messages
+                messages = evaluate_attack(cd_attacks, cr_planes)
+                check_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
+                if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_overall_progress) \
+                        and not check_progress(cr_attacks, cd_planes, def_size):
+                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    messages.append("Battle inconclusive by player disconnect.")
+
+                if messages[-1] == "Battle won by last attack!":
+                    self.battle_dao.conclude_won_battle(battle_id)
+        return messages
