@@ -215,7 +215,7 @@ class BattleService:
             if attack in cd_attacks and not len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             elif len(cr_attacks) == len(cd_attacks):
-                raise InvalidParameter("Wait for your turn.")
+                raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) > len(cd_attacks) and attack not in cd_attacks:
                 if not b.get_battle_turn():
                     attack = random_automatic_attack(cd_attacks, b.get_sky_size())
