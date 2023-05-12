@@ -10,21 +10,21 @@ from model.plane import Plane
 from model.user import User
 
 
-# def test_add_battle_valid_params(mocker):
-#     # Arrange
-#     def mock_get_user_by_id(self, user_id):
-#         return User(1, 'jcad1', 'some_password_hash', 'some_email')
-#
-#     def mock_is_engaged(self, user_id):
-#         return False
-#
-#     mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
-#     mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
-#     # Act
-#     actual = battle_service.add_battle(1, [1, 2, 3], 3, 10, 10)
-#     expected = 'You have set your defense and waiting for a challenger!'
-#     # Assert
-#     assert actual == expected
+def test_add_battle_valid_params(mocker):
+    # Arrange
+    def mock_get_user_by_id(self, user_id):
+        return User(1, 'jcad1', 'some_password_hash', 'some_email')
+
+    def mock_is_engaged(self, user_id):
+        return False
+
+    mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
+    # Act
+    actual = battle_service.add_battle(1, [1, 2, 3], 3, 10, 10)
+    expected = 'You have set your defense and waiting for a challenger!'
+    # Assert
+    assert actual == expected
 
 
 def test_add_battle_invalid_user_id_in_db(mocker):
@@ -650,6 +650,298 @@ def test_battle_update_valid_battle_id_invalid_user_id(mocker):
     with pytest.raises(Forbidden) as e:
         battle_service.battle_update(3, 12, 99)
     assert str(e.value) == 'Request rejected'
+
+
+def test_battle_update_challenger_already_used_attack(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.battle_update(2, 12, 81)
+    assert str(e.value) == 'Attack already used'
+
+
+def test_battle_update_challenged_already_used_attack(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(InvalidParameter) as e:
+        battle_service.battle_update(1, 12, 80)
+    assert str(e.value) == 'Attack already used'
+
+
+def test_battle_update_challenger_battle_turn_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81, 82],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.battle_update(2, 12, 81)
+    assert str(e.value) == 'Wait for your turn.'
+
+
+def test_battle_update_challenged_battle_turn_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, None)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act and # Assert
+    with pytest.raises(Forbidden) as e:
+        battle_service.battle_update(1, 12, 81)
+    assert str(e.value) == 'Wait for your turn.'
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_in_time_self_progres_false_not_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], None, None, False, 3, True)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.battle_update(2, 12, 82)
+    expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (82, 'Miss')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_in_time_self_progres_false_not_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81, 82],
+                      [78, 79, 80, 81], None, None, False, 3, True)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+    # Act
+    actual = battle_service.battle_update(1, 12, 82)
+    expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (82, 'Miss')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_false_not_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (23, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_false_not_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81, 82],
+                      [78, 79, 80, 81], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 24
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (24, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_true_opponents_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 63, 37],
+                      [78, 79, 80, 81], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (63, 'Kill'), (37, 'Kill'), (23, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_true_opponents_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81, 82],
+                      [78, 79, 63, 37], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 24
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (63, 'Kill'), (37, 'Kill'), (24, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_false_opponents_true(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 63, 37], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (23, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_false_opponents_true(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 63, 37, 82],
+                      [78, 79, 80, 81], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 24
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (24, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_false_disconnect_valid_opponents_progress_true(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 63, 37], [78, 79, 80, 81], None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (23, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_false_disconnect_valid_opponents_progress_true(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 63, 37, 82],
+                      [78, 79, 80, 81], None, [78, 79, 80, 81], False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 24
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (24, 'Hit')]
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_false_disconnect_valid_opponents_progress_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81],
+                      [78, 79, 80, 81], [78, 79, 80, 81], None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 23
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (23, 'Hit'), 'Battle inconclusive by '
+                                                                                         'player disconnect.']
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_false_disconnect_valid_opponents_progress_false(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 80, 81, 82],
+                      [78, 79, 80, 81], None, [78, 79, 80, 81], False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 24
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (80, 'Miss'), (81, 'Miss'), (24, 'Hit'), 'Battle inconclusive by '
+                                                                                         'player disconnect.']
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenger_valid_turn_valid_attack_not_in_time_self_progres_true_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 63, 37],
+                      [78, 79, 80, 81], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 25
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(2, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (63, 'Kill'), (37, 'Kill'), (25, 'Kill'), 'Battle won by last attack!']
+    # Assert
+    assert actual == expected
+
+
+def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progres_true_won(mocker):
+    def mock_get_battle_by_id(self, battle_id):
+        return Battle(12, 2, 1, [1, 2, 3], [1, 2, 3], 10, [78, 79, 63, 37, 82],
+                      [78, 79, 63, 37], None, None, False, 3, False)
+
+    mocker.patch('dao.battle.BattleDao.get_battle_by_id', mock_get_battle_by_id)
+
+    # Act
+    def mocked_random_choice(x, y):
+        return 25
+
+    with mock.patch('random.randint', mocked_random_choice):
+        actual = battle_service.battle_update(1, 12, 82)
+        expected = [(78, 'Miss'), (79, 'Miss'), (63, 'Kill'), (37, 'Kill'), (25, 'Kill'), 'Battle won by last attack!']
+    # Assert
+    assert actual == expected
 
 
 # input_validation_helper tests
