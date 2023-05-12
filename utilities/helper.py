@@ -85,14 +85,9 @@ def random_automatic_attack(attacks, sky_size):
 def evaluate_disconnect(attacks, rnd_attacks, check_opponents_overall_progress):
     attacks_str = ''.join(str(e) for e in attacks)
     rnd_attacks_str = ''.join(str(e) for e in rnd_attacks)
-    print(attacks_str)
-    print(rnd_attacks_str)
-    print(len(rnd_attacks))
-
-
     if check_opponents_overall_progress or len(rnd_attacks) < 4:
         return False
-    elif rnd_attacks_str in attacks_str and len(rnd_attacks) == 4:
+    elif rnd_attacks_str in attacks_str and len(rnd_attacks) >= 4:
         return True
 
 
