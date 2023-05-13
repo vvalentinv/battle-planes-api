@@ -170,7 +170,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "",
+					"raw": "{\r\n    \r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -178,7 +178,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/16",
+					"raw": "http://127.0.0.1:5000/battles/80?accepted=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -189,7 +189,13 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"16"
+						"80"
+					],
+					"query": [
+						{
+							"key": "accepted",
+							"value": "True"
+						}
 					]
 				}
 			},
@@ -202,7 +208,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"cockpit\": 37,\r\n    \"flight_direction\": 2,\r\n    \"sky_size\": 10\r\n}",
+					"raw": "{\r\n    \"cockpit\": 2,\r\n    \"flight_direction\": 1,\r\n    \"sky_size\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -210,7 +216,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
+					"raw": "http://127.0.0.1:5000/battles/80?defense=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -221,9 +227,13 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"16",
-						"challengers",
-						"defense"
+						"80"
+					],
+					"query": [
+						{
+							"key": "defense",
+							"value": "True"
+						}
 					]
 				}
 			},
@@ -236,7 +246,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"cockpit\": 63,\r\n    \"flight_direction\": 3,\r\n    \"sky_size\": 10\r\n}",
+					"raw": "{\r\n    \"cockpit\": 7,\r\n    \"flight_direction\": 1,\r\n    \"sky_size\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -244,7 +254,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
+					"raw": "http://127.0.0.1:5000/battles/80?defense=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -255,9 +265,13 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"16",
-						"challengers",
-						"defense"
+						"80"
+					],
+					"query": [
+						{
+							"key": "defense",
+							"value": "True"
+						}
 					]
 				}
 			},
@@ -270,7 +284,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"cockpit\": 25,\r\n    \"flight_direction\": 2,\r\n    \"sky_size\": 10\r\n}",
+					"raw": "{\r\n    \"cockpit\": 52,\r\n    \"flight_direction\": 1,\r\n    \"sky_size\": 10\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -278,7 +292,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/16/challengers/defense",
+					"raw": "http://127.0.0.1:5000/battles/80?defense=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -289,9 +303,13 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"16",
-						"challengers",
-						"defense"
+						"80"
+					],
+					"query": [
+						{
+							"key": "defense",
+							"value": "True"
+						}
 					]
 				}
 			},
@@ -315,7 +333,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/15",
+					"raw": "http://127.0.0.1:5000/battles/80",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -326,7 +344,7 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"15"
+						"80"
 					]
 				}
 			},
@@ -339,7 +357,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"attack\": 92\r\n}",
+					"raw": "{\r\n    \"attack\": 1\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -347,7 +365,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/14/attacks",
+					"raw": "http://127.0.0.1:5000/battles/80?attack=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -358,8 +376,13 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"14",
-						"attacks"
+						"80"
+					],
+					"query": [
+						{
+							"key": "attack",
+							"value": "True"
+						}
 					]
 				}
 			},
