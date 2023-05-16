@@ -23,4 +23,5 @@ Python battle-planes backend with the following endpoints:
   FUTURE FEATURE - add option to remove time constraint, automatic random attack, treat the battle as a game of chess that can be allways resumed until concluded. 
 
  unit testing - 12th May 2023
+  
 ![image](https://github.com/vvalentinv/battle-planes-api/assets/55762636/8745b429-3d66-4a9b-b108-292b557c98a0)
