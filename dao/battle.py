@@ -189,3 +189,20 @@ class BattleDao:
                             , (battle_id,))
                 print("won")
                 return True
+
+    def get_unchallenged_battles(self, user_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM battles "
+                            "WHERE challenger_id = 0 AND battle_turn < Now() + interval '1 MINUTE' ",)
+                b = cur.fetchone()
+                battles = []
+                while b:
+                    battles.append(Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
+                                          b[9], b[10], b[11], b[12]))
+                    b = cur.fetchone()
+                return battles
+
+
