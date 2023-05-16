@@ -69,18 +69,18 @@ def update_battle(battle_id):
     except Forbidden as e:
         return {"message": str(e)}, 403
 
-#
-# @bc.route('/battles/<battle_id>', methods=['PUT'])
-# def start_battle_by_challenger(battle_id):
-#     # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
-#     # TO DO get user_id from read-only cookie and pass it as param to service layer
-#     user_id = 2
-#     try:
-#         return {"message": battle_service.start_battle_by_challenger(user_id, battle_id)}, 200
-#     except InvalidParameter as e:
-#         return {"message": str(e)}, 400
-#     except Forbidden as e:
-#         return {"message": str(e)}, 403
+
+@bc.route('/battles')
+def get_unchallenged_battles():
+    # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
+    # TO DO get user_id from read-only cookie and pass it as param to service layer
+    user_id = 2
+    try:
+        return {"data": battle_service.get_unchallenged_battles(user_id)}, 200
+    except InvalidParameter as e:
+        return {"message": str(e)}, 400
+    except Forbidden as e:
+        return {"message": str(e)}, 403
 
 
 @bc.route('/battles/<battle_id>')

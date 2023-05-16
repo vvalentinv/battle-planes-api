@@ -139,7 +139,7 @@ class BattleService:
             elif len(cr_attacks) == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
                 check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
-                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress)\
+                if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress) \
                         and not check_progress(cd_attacks, my_planes, b.get_defense_size()):
                     self.battle_dao.conclude_unfinished_battle(battle_id)
                     return "Battle inconclusive by player disconnect."
@@ -203,8 +203,8 @@ class BattleService:
                     self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
                 cr_attacks.append(attack)
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks)
-            # Next var determines if a battle is finished playing against random attacks or inconclusive by
-            # disconnection
+                # Next var determines if a battle is finished playing against random attacks or inconclusive by
+                # disconnection
                 messages = evaluate_attack(cr_attacks, cd_planes)
                 check_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
@@ -225,8 +225,8 @@ class BattleService:
                     self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
                 cd_attacks.append(attack)
                 self.battle_dao.add_challenged_attacks_to_battle(battle_id, cd_attacks)
-            # Next var determines if a battle is finished playing against random attacks or inconclusive by
-            # disconnection
+                # Next var determines if a battle is finished playing against random attacks or inconclusive by
+                # disconnection
                 messages = evaluate_attack(cd_attacks, cr_planes)
                 check_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_overall_progress) \
@@ -237,3 +237,15 @@ class BattleService:
                 if messages[-1] == "Battle won by last attack!":
                     self.battle_dao.conclude_won_battle(battle_id)
         return messages
+
+    def get_unchallenged_battles(self, user_id):
+        if self.battle_dao.is_engaged(user_id):
+            return ["Finish your current battle engagement, before attempting a new one!"]
+        unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id)
+        data = []
+        for b in unchallenged_battles:
+            username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
+            defense = b.get_defense_size()
+            sky = b.get_sky_size()
+            data.append([username, defense, sky])
+        return data
