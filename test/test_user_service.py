@@ -49,44 +49,44 @@ def test_add_user_valid_data(mocker):
 
 def test_update_user_invalid_current_password(mocker):
     # Arrange
-    def mock_get_user_by_username(self, username):
-        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+    def mock_get_user_by_id(self, username):
+        return User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
 
-    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
     # Act and  # Assert
     with pytest.raises(Forbidden) as e:
-        user_service.update_user('jcad1', 'Password123!!', 'Password123!!2', 'a@a.ca')
+        user_service.update_user('1', 'Password123!!', 'Password123!!2', 'a@a.ca')
     assert str(e.value) == 'Invalid password for this account!'
 
 
 def test_update_user_valid_current_password_invalid_email(mocker):
     # Arrange
-    def mock_get_user_by_username(self, username):
-        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+    def mock_get_user_by_id(self, username):
+        return User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
 
     def mock_check_for_email(self, email):
         return True
 
-    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
     mocker.patch('dao.user.UserDao.check_for_email', mock_check_for_email)
     # Act and  # Assert
     with pytest.raises(Forbidden) as e:
-        user_service.update_user('jcad1', 'Password123!!2', 'Password123!!', 'a@a.ca')
+        user_service.update_user(1, 'Password123!!2', 'Password123!!', 'a@a.ca')
     assert str(e.value) == 'Please sign into your existing account.'
 
 
 def test_update_user_valid_current_password_valid_email(mocker):
     # Arrange
-    def mock_get_user_by_username(self, username):
-        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+    def mock_get_user_by_id(self, username):
+        return User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
 
     def mock_check_for_email(self, email):
         return False
 
-    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
     mocker.patch('dao.user.UserDao.check_for_email', mock_check_for_email)
     # Act
-    actual = user_service.update_user('jcad1', 'Password123!!2', 'Password123!!', 'a1234@a.ca')
+    actual = user_service.update_user(1, 'Password123!!2', 'Password123!!', 'a1234@a.ca')
     expected = 'Email successfully updated!'
     # Assert
     assert actual == expected
@@ -94,26 +94,26 @@ def test_update_user_valid_current_password_valid_email(mocker):
 
 def test_update_user_invalid_current_password_no_email(mocker):
     # Arrange
-    def mock_get_user_by_username(self, username):
-        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+    def mock_get_user_by_id(self, username):
+        return User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
 
-    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
 
     # Act and  # Assert
     with pytest.raises(Forbidden) as e:
-        user_service.update_user('jcad1', 'Password123!!', 'Password123!!', None)
+        user_service.update_user(1, 'Password123!!', 'Password123!!', None)
     assert str(e.value) == 'Invalid password for this account!'
 
 
 def test_update_user_valid_current_password_no_email(mocker):
     # Arrange
-    def mock_get_user_by_username(self, username):
-        return User(None, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
+    def mock_get_user_by_id(self, username):
+        return User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca')
 
-    mocker.patch('dao.user.UserDao.get_user_by_username', mock_get_user_by_username)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
 
     # Act
-    actual = user_service.update_user('jcad1', 'Password123!!2', 'Password123!!', None)
+    actual = user_service.update_user(1, 'Password123!!2', 'Password123!!', None)
     expected = 'Password successfully updated!'
     # Assert
     assert actual == expected
@@ -193,7 +193,7 @@ def test_invalid_password_format_length_7():
     assert str(e.value) == 'Accepted password length is between 8 and 20 characters inclusive'
 
 
-def test_invalid_password_format_Invalid_special_character():
+def test_invalid_password_format_invalid_special_character():
     # Arrange
     # Act and  # Assert
     with pytest.raises(InvalidParameter) as e:

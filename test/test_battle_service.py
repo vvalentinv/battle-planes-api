@@ -944,6 +944,44 @@ def test_battle_update_challenged_valid_turn_valid_attack_not_in_time_self_progr
     assert actual == expected
 
 
+def test_get_unchallenged_battles_not_engaged(mocker):
+    def mock_get_unchallenged_battles(self, battle_id):
+        return [Battle(99, 0, 1, None, [1, 2, 3], 10, None, None, None, None, False, 3, True),
+                Battle(100, 0, 2, None, [1, 2, 3], 10, None, None, None, None, False, 3, True)]
+
+    def mock_is_engaged(self, user_id):
+        return False
+
+    m = Mock()
+    m.side_effect = [User(1, 'jcad1', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a@a.ca'),
+                     User(2, 'jcad2', '$2b$12$kcvn4uWQAKdu.ZJ1Mv4KV./XBKlIrjTiNkcARUxBZMdCuUC.JixoG', 'a2@a.ca')]
+
+    def mock_get_user_by_id(self, battle_id):
+        return m()
+    mocker.patch('dao.battle.BattleDao.get_unchallenged_battles', mock_get_unchallenged_battles)
+    mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
+    mocker.patch('dao.user.UserDao.get_user_by_id', mock_get_user_by_id)
+
+    # Act
+
+    actual = battle_service.get_unchallenged_battles(1)
+    expected = [['jcad1', 3, 10], ['jcad2', 3, 10]]
+    # Assert
+    assert actual == expected
+
+
+def test_get_unchallenged_battles_engaged(mocker):
+    def mock_is_engaged(self, user_id):
+        return True
+
+    mocker.patch('dao.battle.BattleDao.is_engaged', mock_is_engaged)
+
+    actual = battle_service.get_unchallenged_battles(1)
+    expected = ["Finish your current battle engagement, before attempting a new one!"]
+    # Assert
+    assert actual == expected
+
+
 # input_validation_helper tests
 def test_add_battle_invalid_int():
     # Act and # Assert

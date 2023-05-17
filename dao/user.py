@@ -62,25 +62,25 @@ class UserDao:
                     return User(user[0], user[1], user[2], user[3])
                 return None
 
-    def update_email(self, username, email):
+    def update_email(self, user_id, email):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE users SET email=%s WHERE username=%s RETURNING *", (email, username))
+                cur.execute("UPDATE users SET email=%s WHERE id=%s RETURNING *", (email, user_id))
                 updated_user = cur.fetchone()
                 if updated_user:
                     return "Email successfully updated!"
                 return None
 
 
-    def update_password(self, username, n_pwd):
+    def update_password(self, user_id, n_pwd):
         h_pass = hash_registering_password(n_pwd.encode('utf-8'))
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE users SET pass=%s WHERE username=%s RETURNING *", (h_pass.decode(), username))
+                cur.execute("UPDATE users SET pass=%s WHERE id=%s RETURNING *", (h_pass.decode(), user_id))
                 updated_user = cur.fetchone()
                 if updated_user:
                     return "Password successfully updated!"
