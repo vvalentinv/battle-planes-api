@@ -25,3 +25,9 @@ Python battle-planes backend with the following endpoints:
  unit testing - 12th May 2023
   
 ![image](https://github.com/vvalentinv/battle-planes-api/assets/55762636/8745b429-3d66-4a9b-b108-292b557c98a0)
+
+- [x]           TO DO add tests for new endpoint
+ 
+ unit testing - 17th May 2023
+ 
+![image](https://github.com/vvalentinv/battle-planes-api/assets/55762636/f3d72520-4c9d-40aa-8126-1a33a4005e43)
