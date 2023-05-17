@@ -24,15 +24,17 @@ def add_user():
         return {"message": str(e)}, 403
 
 
-@uc.route('/users/<username>', methods=['PUT'])
-def update_user(username):
+@uc.route('/users/', methods=['PUT'])
+def update_user():
     # TO DO check if the signed-in user is the owner of the account to be changed
+    # TO DO get user_id from identity
     r_body = request.get_json()
+    user_id = 1
     try:
         n_pwd = r_body.get('new_password', None)
         password = r_body.get('password', None)
         email = r_body.get('email', None)
-        updated_user = user_service.update_user(username, password, n_pwd, email)
+        updated_user = user_service.update_user(user_id, password, n_pwd, email)
         return {"message": updated_user}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400

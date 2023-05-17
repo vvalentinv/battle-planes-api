@@ -18,15 +18,15 @@ class UserService:
                 raise Forbidden("This email is already in use! Please sign into your existing account.")
             return self.user_dao.add_user(User(None, username, password, email))
 
-    def update_user(self, username, password, n_pwd, email):
+    def update_user(self, user_id, password, n_pwd, email):
         if email is not None:
             if validate_email(email):
-                if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
+                if not validate_password(password, self.user_dao.get_user_by_id(user_id).get_password()):
                     raise Forbidden("Invalid password for this account!")
                 elif self.user_dao.check_for_email(email):
                     raise Forbidden("Please sign into your existing account.")
-                return self.user_dao.update_email(username, email)
+                return self.user_dao.update_email(user_id, email)
         elif validate_password_value(n_pwd):
-            if not validate_password(password, self.user_dao.get_user_by_username(username).get_password()):
+            if not validate_password(password, self.user_dao.get_user_by_id(user_id).get_password()):
                 raise Forbidden("Invalid password for this account!")
-            return self.user_dao.update_password(username, n_pwd)
+            return self.user_dao.update_password(user_id, n_pwd)
