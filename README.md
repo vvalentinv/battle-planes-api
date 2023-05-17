@@ -10,7 +10,7 @@ Battle-Planes is a Battleships similar game where all targets have a 10-square s
 
 Python battle-planes backend with the following endpoints:
 - POST /users - adds a user record in the db with a unique username and email and valid password format
-- PUT /users/<username> - if request is validated it updates a users email or password, not both 
+- PUT /users - if request is validated it updates a users email or password, not both 
 - POST /planes/<sky_size> - not for public use; adds all possible planes in the planes table for a given battle matrix size
 - POST /battles - adds an unchallenged battle for a user, body params, user's defense (array of plane IDs), sky size, defense size and the time willing to wait for a challenger
   - [ ] TO DO (add a private param that takes a username or a list of usernames (array of IDs), making the battle available just for a specific user or users list)
