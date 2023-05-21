@@ -65,6 +65,7 @@ class BattleService:
         if validate_int(defense_size) and validate_int(sky_size) \
                 and validate_array_of_ints(defense) and validate_int(max_time):
             self.battle_dao.conclude_unchallenged_battles(user_id)
+            self.battle_dao.conclude_unstarted_battle()
             if not self.user_dao.get_user_by_id(user_id):
                 raise Forbidden("Request rejected!")
             elif self.battle_dao.is_engaged(user_id):
@@ -244,8 +245,14 @@ class BattleService:
         data = {'message': "", 'battles': []}
         if self.battle_dao.is_engaged(user_id):
             data['message'] = "Finish your current battle engagement, before attempting a new one!"
-        unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id)
+        unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id) or []
         data['battles'] = []
+        if not len(unchallenged_battles) and \
+                data['message'] == "Finish your current battle engagement, before attempting a new one!":
+            b = self.battle_dao.get_defense_setup_for_challenger(user_id)
+            data['battles'].append(
+                [b.get_battle_id(), self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
+                    , b.get_defense_size(), b.get_sky_size()])
         for b in unchallenged_battles:
             b_id = b.get_battle_id()
             username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()

@@ -179,6 +179,17 @@ class BattleDao:
                             , (battle_id,))
                 return True
 
+    def conclude_unstarted_battle(self):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
+                            "WHERE coalesce(array_length(challenger_defense, 1), 0) < defense_size "
+                            "AND battle_turn < Now() "
+                            )
+                return True
+
     def conclude_won_battle(self, battle_id):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
@@ -205,4 +216,15 @@ class BattleDao:
                     b = cur.fetchone()
                 return battles
 
-
+    def get_defense_setup_for_challenger(self, user_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM battles WHERE challenger_id = %s and "
+                            "coalesce(array_length(challenger_defense, 1), 0) < defense_size and concluded = False",
+                            (user_id, ))
+                b = cur.fetchone()
+                if b:
+                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
+                                          b[9], b[10], b[11], b[12])
