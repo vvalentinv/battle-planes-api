@@ -22,6 +22,7 @@ class BattleService:
             if b is None:
                 raise InvalidParameter("Request rejected1")
             existing_defense = b.get_challenger_defense() or []
+            print(existing_defense)
             if b.get_defense_size() <= len(existing_defense):
                 raise InvalidParameter("Request rejected2")
             elif not user_id == b.get_challenger_id():
@@ -36,6 +37,7 @@ class BattleService:
             if not validate_defense(self.plane_dao.get_plane_by_plane_id(plane_id), planes):
                 raise Forbidden("Overlapping planes")
             if not self.battle_dao.is_time_left(b.get_battle_id()):
+                self.battle_dao.conclude_unfinished_battle(battle_id)
                 raise Forbidden("Time frame to add planes for defense setup elapsed.")
             existing_defense.append(plane_id)
             return self.battle_dao.add_planes_to_battle_defense_by_username(battle_id, existing_defense)
@@ -239,13 +241,15 @@ class BattleService:
         return messages
 
     def get_unchallenged_battles(self, user_id):
+        data = {'message': "", 'battles': []}
         if self.battle_dao.is_engaged(user_id):
-            return ["Finish your current battle engagement, before attempting a new one!"]
+            data['message'] = "Finish your current battle engagement, before attempting a new one!"
         unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id)
-        data = []
+        data['battles'] = []
         for b in unchallenged_battles:
+            b_id = b.get_battle_id()
             username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
             defense = b.get_defense_size()
             sky = b.get_sky_size()
-            data.append([username, defense, sky])
+            data['battles'].append([b_id, username, defense, sky])
         return data
