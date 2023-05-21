@@ -1,4 +1,5 @@
 from flask import Blueprint, request
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
@@ -25,11 +26,10 @@ def add_user():
 
 
 @uc.route('/users/', methods=['PUT'])
+@jwt_required()
 def update_user():
-    # TO DO check if the signed-in user is the owner of the account to be changed
-    # TO DO get user_id from identity
     r_body = request.get_json()
-    user_id = 1
+    user_id = get_jwt_identity().get("user_id")
     try:
         n_pwd = r_body.get('new_password', None)
         password = r_body.get('password', None)
