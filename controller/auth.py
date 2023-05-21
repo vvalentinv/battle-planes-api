@@ -4,7 +4,7 @@ from service.auth import AuthService
 from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 import flask
 
-ac = Blueprint('auth', __name__)
+ac = Blueprint('auth_controller', __name__)
 auth = AuthService()
 
 
