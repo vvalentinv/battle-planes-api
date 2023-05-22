@@ -249,9 +249,8 @@ class BattleService:
         data['battles'] = []
         battle = self.battle_dao.get_defense_setup_for_challenger(user_id)
         cr_def = battle.get_challenger_defense() or []
-        if len(cr_def) < battle.get_defense_size() and \
+        if battle is not None and len(cr_def) < battle.get_defense_size() and \
                 data['message'] == "Finish your current battle engagement, before attempting a new one!":
-
             data['battles'].append(
                 [battle.get_battle_id(), battle.get_challenger_defense()
                     , battle.get_defense_size(), battle.get_sky_size()])
