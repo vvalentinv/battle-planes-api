@@ -98,8 +98,6 @@ def get_unchallenged_battles():
                 "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
-    except Forbidden as e:
-        return {"message": str(e)}, 403
 
 
 @bc.route('/battles/<battle_id>')
