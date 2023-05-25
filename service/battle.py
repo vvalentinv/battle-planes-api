@@ -261,7 +261,7 @@ class BattleService:
                 username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
                 defense = b.get_defense_size()
                 sky = b.get_sky_size()
-                data['battles'].append([b_id, username, defense, sky])
+                data['battles'].append([b_id, defense, username, sky])
         else:
             data['message'] = "Please resume battle screen"
 
