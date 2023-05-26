@@ -65,8 +65,8 @@ def update_battle(battle_id):
         try:
             if defense:
                 cockpit = r_body.get('cockpit', None)
-                flight_direction = r_body.get('flight_direction', None)
-                sky_size = r_body.get('sky_size', None)
+                flight_direction = r_body.get('direction', None)
+                sky_size = r_body.get('sky', None)
                 if cockpit and flight_direction and sky_size:
                     return {"message": battle_service.add_plane_to_battle_defense_by_challenger(battle_id, user_id, cockpit,
                                                                                                 flight_direction,
