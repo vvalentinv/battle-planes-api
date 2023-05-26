@@ -18,6 +18,7 @@ class BattleService:
     def add_plane_to_battle_defense_by_challenger(self, battle_id, user_id, cockpit, flight_direction, sky_size):
         if validate_int(battle_id) and validate_int(cockpit) and validate_flight_direction(flight_direction) \
                 and validate_int(sky_size) and 9 < sky_size < 16:
+
             b = self.battle_dao.get_battle_by_id(battle_id)
             if b is None:
                 raise InvalidParameter("Request rejected1")
@@ -248,12 +249,22 @@ class BattleService:
         unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id) or []
         data['battles'] = []
         battle = self.battle_dao.get_defense_setup_for_challenger(user_id)
+        defense = []
+        if battle and battle.get_challenger_defense():
+            for p_id in battle.get_challenger_defense():
+                p = []
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                p.append(plane.get_cockpit())
+                body = plane.get_body()
+                for b in body[0]:
+                    p.append(b)
+                defense.append(p)
         if battle:
             cr_def = battle.get_challenger_defense() or []
         if battle is not None and len(cr_def) < battle.get_defense_size() and \
                 data['message'] == "Finish your current battle engagement, before attempting a new one!":
             data['battles'].append(
-                [battle.get_battle_id(), battle.get_challenger_defense()
+                [battle.get_battle_id(), defense
                     , battle.get_defense_size(), battle.get_sky_size()])
         elif data['message'] == '':
             for b in unchallenged_battles:
@@ -261,7 +272,7 @@ class BattleService:
                 username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
                 defense = b.get_defense_size()
                 sky = b.get_sky_size()
-                data['battles'].append([b_id, username, defense, sky])
+                data['battles'].append([b_id, defense, username, sky])
         else:
             data['message'] = "Please resume battle screen"
 

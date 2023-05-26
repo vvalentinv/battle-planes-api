@@ -73,7 +73,7 @@ def validate_int(number):
 
 
 def validate_flight_direction(direction):
-    if direction not in {1, 2, 3, 4}:
+    if direction not in {"1", "2", "3", "4"}:
         raise InvalidParameter("Expected one of 1, 2, 3, or 4")
     return True
 
