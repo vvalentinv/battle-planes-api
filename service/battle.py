@@ -22,6 +22,9 @@ class BattleService:
             b = self.battle_dao.get_battle_by_id(battle_id)
             if b is None:
                 raise InvalidParameter("Request rejected1")
+            if not self.battle_dao.is_time_left(b.get_battle_id()):
+                self.battle_dao.conclude_unfinished_battle(battle_id)
+                raise Forbidden("Time frame to add planes for defense setup elapsed.")
             existing_defense = b.get_challenger_defense() or []
             print(existing_defense)
             if b.get_defense_size() <= len(existing_defense):
@@ -37,9 +40,7 @@ class BattleService:
                     planes.append(self.plane_dao.get_plane_by_plane_id(p_id))
             if not validate_defense(self.plane_dao.get_plane_by_plane_id(plane_id), planes):
                 raise Forbidden("Overlapping planes")
-            if not self.battle_dao.is_time_left(b.get_battle_id()):
-                self.battle_dao.conclude_unfinished_battle(battle_id)
-                raise Forbidden("Time frame to add planes for defense setup elapsed.")
+
             existing_defense.append(plane_id)
             return self.battle_dao.add_planes_to_battle_defense_by_username(battle_id, existing_defense)
         else:
