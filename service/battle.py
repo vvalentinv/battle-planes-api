@@ -251,6 +251,7 @@ class BattleService:
         data['battles'] = []
         battle = self.battle_dao.get_defense_setup_for_challenger(user_id)
         defense = []
+        cr_def = []
         if battle and battle.get_challenger_defense():
             for p_id in battle.get_challenger_defense():
                 p = []
