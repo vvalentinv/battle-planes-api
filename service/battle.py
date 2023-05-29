@@ -95,7 +95,7 @@ class BattleService:
         cd_rnd_attacks = b.get_rnd_attack_ed() or []
         # conclude challenged unfinished defense setups
         if not b.get_challenger_id() == 0 and not len(cr_defense) == len(cd_defense) \
-                and not b.get_battle_turn():
+                and not b.check_battle_turn():
             self.battle_dao.conclude_unfinished_battle(battle_id)
         elif user_id == b.get_challenger_id() and len(cr_defense) == len(cd_defense):
             data = [b.get_challenger_attacks(), b.get_challenger_defense(), b.get_challenged_attacks()]
@@ -106,7 +106,7 @@ class BattleService:
             for plane_id in b.get_challenger_defense():
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages = evaluate_attack(cr_attacks, planes)
-            if len(cr_attacks) == len(cd_attacks) and b.get_battle_turn():
+            if len(cr_attacks) == len(cd_attacks) and b.check_battle_turn():
                 turn = "This is your turn to attack."
             elif len(cr_attacks) - 1 == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
@@ -116,7 +116,7 @@ class BattleService:
                     self.battle_dao.conclude_unfinished_battle(battle_id)
                     return "Battle inconclusive by opponent disconnect."
             # perform auto attack if turn expired
-            elif len(cr_attacks) == len(cd_attacks) and not b.get_battle_turn():
+            elif len(cr_attacks) == len(cd_attacks) and not b.check_battle_turn():
                 attack = random_automatic_attack(cr_attacks, b.get_sky_size())
                 cr_rnd_attacks.append(attack)
                 cr_attacks.append(attack)
@@ -139,7 +139,7 @@ class BattleService:
             for plane_id in b.get_challenged_defense():
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages = evaluate_attack(cd_attacks, planes)
-            if len(cr_attacks) == len(cd_attacks) + 1 and b.get_battle_turn():
+            if len(cr_attacks) == len(cd_attacks) + 1 and b.check_battle_turn():
                 turn = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks):
                 turn = "Wait for your opponent's attack."
@@ -149,7 +149,7 @@ class BattleService:
                     self.battle_dao.conclude_unfinished_battle(battle_id)
                     return "Battle inconclusive by player disconnect."
             # perform auto attack if turn expired
-            elif len(cr_attacks) == len(cd_attacks) + 1 and not b.get_battle_turn():
+            elif len(cr_attacks) == len(cd_attacks) + 1 and not b.check_battle_turn():
                 attack = random_automatic_attack(cd_attacks, b.get_sky_size())
                 cd_rnd_attacks.append(attack)
                 cd_attacks.append(attack)
@@ -202,7 +202,7 @@ class BattleService:
             elif len(cr_attacks) > len(cd_attacks):
                 raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
-                if not b.get_battle_turn():
+                if not b.check_battle_turn():
                     attack = random_automatic_attack(cr_attacks, b.get_sky_size())
                     cr_rnd_attacks.append(attack)
                     self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks)
@@ -224,7 +224,7 @@ class BattleService:
             elif len(cr_attacks) == len(cd_attacks):
                 raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) > len(cd_attacks) and attack not in cd_attacks:
-                if not b.get_battle_turn():
+                if not b.check_battle_turn():
                     attack = random_automatic_attack(cd_attacks, b.get_sky_size())
                     cd_rnd_attacks.append(attack)
                     self.battle_dao.add_random_challenged_attacks_to_battle(battle_id, cd_rnd_attacks)
