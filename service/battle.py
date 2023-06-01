@@ -267,14 +267,14 @@ class BattleService:
                 data['message'] == "Finish your current battle engagement, before attempting a new one!":
             data['battles'].append(
                 [battle.get_battle_id(), defense
-                    , battle.get_defense_size(), battle.get_sky_size()])
+                    , battle.get_defense_size(), battle.get_sky_size(), battle.get_battle_turn()])
         elif data['message'] == '':
             for b in unchallenged_battles:
                 b_id = b.get_battle_id()
                 username = self.user_dao.get_user_by_id(b.get_challenged_id()).get_username()
                 defense = b.get_defense_size()
                 sky = b.get_sky_size()
-                data['battles'].append([b_id, defense, username, sky])
+                data['battles'].append([b_id, defense, username, sky, b.get_battle_turn()])
         else:
             data['message'] = "Please resume battle screen"
 

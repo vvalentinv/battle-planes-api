@@ -19,10 +19,10 @@ def add_battle():
     req_id = get_jwt_identity()
     r_body = request.get_json()
     try:
-        max_time = r_body.get('max_time', None)
+        max_time = r_body.get('max-time', None)
         defense = r_body.get('defense', None)
-        defense_size = r_body.get('defense_size', None)
-        sky_size = r_body.get('sky_size', None)
+        defense_size = r_body.get('defense-size', None)
+        sky_size = r_body.get('sky-size', None)
         if defense and defense_size and sky_size and max_time:
             return {"message": battle_service.add_battle(req_id.get("user_id"), defense, defense_size, sky_size,
                                                          max_time)}, 201
