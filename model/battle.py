@@ -1,3 +1,6 @@
+import datetime
+
+
 class Battle:
     def __init__(self, battle_id, challenger_id,	challenged_id, challenger_defense, challenged_defense,
                  sky_size, challenger_attacks, challenged_attacks, rnd_attack_er, rnd_attack_ed, concluded,
@@ -93,6 +96,9 @@ class Battle:
 
     def set_battle_turn(self, value):
         self.__battle_turn = value
+
+    def check_battle_turn(self):
+        return self.get_battle_turn() > datetime.datetime.now()
 
     def to_dict(self):
         return {
