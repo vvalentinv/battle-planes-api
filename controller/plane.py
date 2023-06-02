@@ -1,6 +1,7 @@
 import logging
 import traceback
 
+import flask
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -22,16 +23,26 @@ plane_service = PlaneService()
 #     return {"message": f"planes added to database for sky_size = {sky_size}"}, 201
 
 
-@pc.route('/planes')
+@pc.route('/planes', methods=['GET', 'OPTIONS'])
 @jwt_required()
-def get_plane_id():
-    r_body = request.get_json()
-    try:
-        cockpit = r_body.get('cockpit', None)
-        flight_direction = r_body.get('direction', None)
-        sky_size = r_body.get('sky', None)
-        return {"message": plane_service.get_plane_id(cockpit, flight_direction, sky_size)}, 200
-    except InvalidParameter as e:
-        return {"message": str(e)}, 400
-    except Exception as e:
-        logging.error(traceback.format_exc())
+def get_plane():
+    if request.method == "OPTIONS":
+        resp = flask.Response("preflight")
+        resp.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5500"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Access-Control-Allow-Credentials"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp
+
+    elif request.method == "GET":
+        args = request.args
+        try:
+            cockpit = args.get('cockpit', None)
+            flight_direction = args.get('direction', None)
+            sky_size = args.get('sky', None)
+            if cockpit and flight_direction and sky_size:
+                return {"message": plane_service.get_plane(cockpit, flight_direction, sky_size)}, 200
+        except InvalidParameter as e:
+            return {"message": str(e)}, 400
+        except Exception as e:
+            logging.error(traceback.format_exc())
