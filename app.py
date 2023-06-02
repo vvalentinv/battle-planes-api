@@ -3,7 +3,7 @@ from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
 
-# from controller.plane import pc
+from controller.plane import pc
 from controller.user import uc
 from controller.battle import bc
 from controller.auth import ac
@@ -28,8 +28,7 @@ if __name__ == '__main__':
     app.config["JWT_ACCESS_CSRF_HEADER_NAME"] = "X-CSRF-TOKEN-ACCESS"
     app.config["JWT_REFRESH_CSRF_HEADER_NAME"] = "X-CSRF-TOKEN-REFRESH"
     jwt = JWTManager(app)
-    # required when adding all planes for a sky_size to db
-    # app.register_blueprint(pc)
+    app.register_blueprint(pc)
     app.register_blueprint(bc)
     app.register_blueprint(uc)
     app.register_blueprint(ac)

@@ -1,3 +1,4 @@
+import flask
 from flask import Blueprint, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -25,7 +26,7 @@ def add_user():
         return {"message": str(e)}, 403
 
 
-@uc.route('/users/', methods=['PUT'])
+@uc.route('/users', methods=['PUT'])
 @jwt_required()
 def update_user():
     r_body = request.get_json()
@@ -42,3 +43,17 @@ def update_user():
         return {"message": str(e)}, 403
 
 
+@uc.route('/users', methods=['GET', 'OPTIONS'])
+@jwt_required()
+def get_user():
+    if request.method == "OPTIONS":
+        resp = flask.Response("preflight")
+        resp.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5500"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Access-Control-Allow-Credentials"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp
+
+    elif request.method == "GET":
+
+        return {"user": get_jwt_identity().get('username')}, 200
