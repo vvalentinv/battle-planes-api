@@ -32,3 +32,5 @@ class UserService:
             if not validate_password(password, self.user_dao.get_user_by_id(user_id).get_password()):
                 raise Forbidden("Invalid password for this account!")
             return self.user_dao.update_password(user_id, n_pwd)
+
+
