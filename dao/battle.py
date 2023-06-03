@@ -204,7 +204,7 @@ class BattleDao:
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles "
-                            "WHERE challenger_id = 0 AND battle_turn > Now() + interval '1 MINUTE' AND "
+                            "WHERE challenger_id = 0 AND battle_turn > Now() AND "
                             "concluded = False",)
                 b = cur.fetchone()
                 battles = []
