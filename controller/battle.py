@@ -33,10 +33,12 @@ def add_battle():
             defense_size = r_body.get('defense-size', None)
             sky_size = r_body.get('sky-size', None)
             if defense and defense_size and sky_size and max_time:
-                return {"message": battle_service.add_battle(req_id.get("user_id"), defense, defense_size, sky_size,
-                                                             max_time)}, 201
+                return {"timeStamp": battle_service.add_battle(req_id.get("user_id"), defense,
+                                                               defense_size, sky_size, max_time)[1],
+                        "battleId": battle_service.add_battle(req_id.get("user_id"), defense,
+                                                              defense_size, sky_size, max_time)[0]}, 201
             else:
-                return "All parameters are required."
+                return {"message": "All parameters are required."}, 400
         except InvalidParameter as e:
             return {"message": str(e)}, 400
         except Forbidden as e:
@@ -77,7 +79,8 @@ def update_battle(battle_id):
                 flight_direction = r_body.get('direction', None)
                 sky_size = r_body.get('sky', None)
                 if cockpit and flight_direction and sky_size:
-                    return {"message": battle_service.add_plane_to_battle_defense_by_challenger(battle_id, user_id, cockpit,
+                    return {"message": battle_service.add_plane_to_battle_defense_by_challenger(battle_id, user_id,
+                                                                                                cockpit,
                                                                                                 flight_direction,
                                                                                                 sky_size)}, 200
                 else:

@@ -62,8 +62,8 @@ class BattleDao:
                     (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
                 b = cur.fetchone()
                 if b:
-                    return "You have set your defense and waiting for a challenger!"
-                return None
+                    return b[0], b[12]
+                return "db error", "db error"
 
     def is_engaged(self, user_id):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
