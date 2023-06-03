@@ -10,28 +10,37 @@ bc = Blueprint('battle_controller', __name__)
 battle_service = BattleService()
 
 
-@bc.route('/battles', methods=['POST'])
+@bc.route('/battles', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def add_battle():
     # Adds a battle record for a player that already selected battle parameters, their defense, and the maximum
     # amount of time willing to wait for a challenger
     # TO DO get username from read-only cookie and pass it as param to service layer
-    req_id = get_jwt_identity()
-    r_body = request.get_json()
-    try:
-        max_time = r_body.get('max-time', None)
-        defense = r_body.get('defense', None)
-        defense_size = r_body.get('defense-size', None)
-        sky_size = r_body.get('sky-size', None)
-        if defense and defense_size and sky_size and max_time:
-            return {"message": battle_service.add_battle(req_id.get("user_id"), defense, defense_size, sky_size,
-                                                         max_time)}, 201
-        else:
-            return "All parameters are required."
-    except InvalidParameter as e:
-        return {"message": str(e)}, 400
-    except Forbidden as e:
-        return {"message": str(e)}, 403
+    if request.method == "OPTIONS":
+        resp = flask.Response("preflight")
+        resp.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5500"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Access-Control-Allow-Credentials"
+        resp.headers["Access-Control-Allow-Methods"] = "PUT, OPTIONS"
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp
+
+    elif request.method == "POST":
+        req_id = get_jwt_identity()
+        r_body = request.get_json()
+        try:
+            max_time = r_body.get('max-time', None)
+            defense = r_body.get('defense', None)
+            defense_size = r_body.get('defense-size', None)
+            sky_size = r_body.get('sky-size', None)
+            if defense and defense_size and sky_size and max_time:
+                return {"message": battle_service.add_battle(req_id.get("user_id"), defense, defense_size, sky_size,
+                                                             max_time)}, 201
+            else:
+                return "All parameters are required."
+        except InvalidParameter as e:
+            return {"message": str(e)}, 400
+        except Forbidden as e:
+            return {"message": str(e)}, 403
 
 
 @bc.route('/battles/<battle_id>', methods=['PUT', 'OPTIONS'])
