@@ -264,7 +264,7 @@ class BattleService:
         if battle:
             cr_def = battle.get_challenger_defense() or []
         if battle is not None and len(cr_def) < battle.get_defense_size() and \
-                data['message'] == "Finish your current battle engagement, before attempting a new one!":
+                data['message'] == "Finish defense setup and complete the challenge before attempting a new one!":
             data['battles'].append(
                 [battle.get_battle_id(), defense
                     , battle.get_defense_size(), battle.get_sky_size(), battle.get_battle_turn()])
