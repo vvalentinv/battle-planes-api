@@ -164,7 +164,7 @@ class BattleService:
                     planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
                 messages = evaluate_attack(cd_attacks, planes)
         else:
-            raise Forbidden("This battle is private.")
+            return "Waiting for challenger's defense setup!", None, b.get_battle_turn()
         return messages, data, turn
 
     def battle_update(self, user_id, battle_id, attack):
