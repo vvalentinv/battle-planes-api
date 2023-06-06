@@ -40,7 +40,7 @@ CREATE TABLE battles(
 	rnd_attack_ed INT[],
 	concluded BOOLEAN  NOT NULL DEFAULT False,
 	defense_size INT DEFAULT 3,
-	battle_turn TIMESTAMP,
+	battle_turn TIMESTAMPTZ,
 	CONSTRAINT fk_challenger_id
   		FOREIGN KEY (challenger_id) REFERENCES "users" (id),
   	CONSTRAINT fk_challenged_id
