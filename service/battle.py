@@ -198,7 +198,7 @@ class BattleService:
             # check if it"s challenger"s turn (attack fields have same lengths
             if attack in cr_attacks and not len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Attack already used")
-            # challenged player"s turn
+            # challenged player's turn
             elif len(cr_attacks) > len(cd_attacks):
                 raise Forbidden("Wait for your turn.")
             elif len(cr_attacks) == len(cd_attacks) and attack not in cr_attacks:
@@ -266,8 +266,8 @@ class BattleService:
         if battle is not None and len(cr_def) < battle.get_defense_size() and \
                 data['message'] == "Finish your current battle engagement, before attempting a new one!":
             data['battles'].append(
-                [battle.get_battle_id(), defense
-                    , battle.get_defense_size(), battle.get_sky_size(), battle.get_battle_turn()])
+                [battle.get_battle_id(), defense,
+                 battle.get_defense_size(), battle.get_sky_size(), battle.get_battle_turn()])
         elif data['message'] == '':
             for b in unchallenged_battles:
                 b_id = b.get_battle_id()

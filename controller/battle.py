@@ -100,16 +100,22 @@ def update_battle(battle_id):
 
 @bc.route('/battles')
 @jwt_required()
-def get_unchallenged_battles():
+def get_unchallenged_battles_or_battle_status():
     # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
     # TO DO get user_id from read-only cookie and pass it as param to service layer
     user_id = get_jwt_identity().get("user_id")
 
     try:
+        battle_id = battle_service.battle_dao.is_engaged(user_id)
+        if battle_id:
+            return {"message": battle_service.get_status(user_id, battle_id),
+                    "user": get_jwt_identity().get('username')}, 200
         return {"battles": battle_service.get_unchallenged_battles(user_id),
                 "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
+    except Forbidden as e:
+        return {"message": str(e)}, 403
 
 
 @bc.route('/battles/<battle_id>')
