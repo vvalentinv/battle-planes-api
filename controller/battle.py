@@ -106,9 +106,9 @@ def get_unchallenged_battles_or_battle_status():
     user_id = get_jwt_identity().get("user_id")
     args = request.args
     try:
-        status = args.get('status')
+        defeat_status = args.get('defeat', None)
         battle_id = battle_service.battle_dao.is_engaged(user_id)
-        if battle_id and status:
+        if battle_id and defeat_status:
             return {"message": battle_service.get_status(user_id, battle_id),
                     "user": get_jwt_identity().get('username')}, 200
         return {"battles": battle_service.get_unchallenged_battles(user_id),
