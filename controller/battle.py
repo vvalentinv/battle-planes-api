@@ -119,18 +119,18 @@ def get_unchallenged_battles_or_battle_status():
         return {"message": str(e)}, 403
 
 
-@bc.route('/battles/<battle_id>')
-@jwt_required()
-def get_battle_status(battle_id):
-    # Returns a battle data for the user
-    # TO DO get user_id from read-only cookie and pass it as param to service layer
-    user_id = get_jwt_identity().get("user_id")
-    try:
-        return {"message": battle_service.get_status(user_id, battle_id)}, 200
-    except InvalidParameter as e:
-        return {"message": str(e)}, 400
-    except Forbidden as e:
-        return {"message": str(e)}, 403
+# @bc.route('/battles/<battle_id>')
+# @jwt_required()
+# def get_battle_status(battle_id):
+#     # Returns a battle data for the user
+#     # TO DO get user_id from read-only cookie and pass it as param to service layer
+#     user_id = get_jwt_identity().get("user_id")
+#     try:
+#         return {"message": battle_service.get_status(user_id, battle_id)}, 200
+#     except InvalidParameter as e:
+#         return {"message": str(e)}, 400
+#     except Forbidden as e:
+#         return {"message": str(e)}, 403
 
 #
 # @bc.route('/battles/<battle_id>/attacks', methods=['PUT'])
