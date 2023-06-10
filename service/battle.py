@@ -76,18 +76,19 @@ class BattleService:
                             None, defense, sky_size, None, None, None, None, False, defense_size, None)
             return self.battle_dao.add_battle(battle, max_time)
 
-    def get_status(self, user_id, battle_id):
+    def get_status(self, user_id, battle_id, defeat):
         messages = {"defense_messages": [], "attack_messages": []}
         data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
         turn = {"turn": ""}
         if validate_int(battle_id):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
-        print(b)
         if b is None:
             raise Forbidden("Request rejected")
         if b.get_concluded():
             raise InvalidParameter("Use battle history")
+        if defeat == "True":
+            return self.battle_dao.conclude_unfinished_battle(battle_id)
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
         cr_attacks = b.get_challenger_attacks() or []
