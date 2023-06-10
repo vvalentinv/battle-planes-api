@@ -33,10 +33,9 @@ def add_battle():
             defense_size = r_body.get('defense-size', None)
             sky_size = r_body.get('sky-size', None)
             if defense and defense_size and sky_size and max_time:
-                return {"timeStamp": battle_service.add_battle(req_id.get("user_id"), defense,
-                                                               defense_size, sky_size, max_time)[1],
-                        "battleId": battle_service.add_battle(req_id.get("user_id"), defense,
-                                                              defense_size, sky_size, max_time)[0]}, 201
+                opened_challenge = battle_service.add_battle(req_id.get("user_id"), defense,
+                                                             defense_size, sky_size, max_time)
+                return {"timeStamp": opened_challenge[1], "battleId": opened_challenge[0]}, 201
             else:
                 return {"message": "All parameters are required."}, 400
         except InvalidParameter as e:
@@ -100,30 +99,36 @@ def update_battle(battle_id):
 
 @bc.route('/battles')
 @jwt_required()
-def get_unchallenged_battles():
+def get_unchallenged_battles_or_battle_status():
     # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
     # TO DO get user_id from read-only cookie and pass it as param to service layer
     user_id = get_jwt_identity().get("user_id")
-
+    args = request.args
     try:
+        defeat_status = args.get('defeat', None)
+        battle_id = battle_service.battle_dao.is_engaged(user_id)
+        if battle_id and defeat_status:
+            return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
+                    "user": get_jwt_identity().get('username')}, 200
         return {"battles": battle_service.get_unchallenged_battles(user_id),
                 "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
-
-
-@bc.route('/battles/<battle_id>')
-@jwt_required()
-def get_battle_status(battle_id):
-    # Returns a battle data for the user
-    # TO DO get user_id from read-only cookie and pass it as param to service layer
-    user_id = get_jwt_identity().get("user_id")
-    try:
-        return {"message": battle_service.get_status(user_id, battle_id)}, 200
-    except InvalidParameter as e:
-        return {"message": str(e)}, 400
     except Forbidden as e:
         return {"message": str(e)}, 403
+
+# @bc.route('/battles/<battle_id>')
+# @jwt_required()
+# def get_battle_status(battle_id):
+#     # Returns a battle data for the user
+#     # TO DO get user_id from read-only cookie and pass it as param to service layer
+#     user_id = get_jwt_identity().get("user_id")
+#     try:
+#         return {"message": battle_service.get_status(user_id, battle_id)}, 200
+#     except InvalidParameter as e:
+#         return {"message": str(e)}, 400
+#     except Forbidden as e:
+#         return {"message": str(e)}, 403
 
 #
 # @bc.route('/battles/<battle_id>/attacks', methods=['PUT'])

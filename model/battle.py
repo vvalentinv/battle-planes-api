@@ -98,7 +98,7 @@ class Battle:
         self.__battle_turn = value
 
     def check_battle_turn(self):
-        return self.get_battle_turn() > datetime.datetime.now()
+        return self.get_battle_turn().timestamp() > datetime.datetime.now().timestamp()
 
     def to_dict(self):
         return {
