@@ -33,10 +33,9 @@ def add_battle():
             defense_size = r_body.get('defense-size', None)
             sky_size = r_body.get('sky-size', None)
             if defense and defense_size and sky_size and max_time:
-                return {"timeStamp": battle_service.add_battle(req_id.get("user_id"), defense,
-                                                               defense_size, sky_size, max_time)[1],
-                        "battleId": battle_service.add_battle(req_id.get("user_id"), defense,
-                                                              defense_size, sky_size, max_time)[0]}, 201
+                opened_challenge = battle_service.add_battle(req_id.get("user_id"), defense,
+                                                             defense_size, sky_size, max_time)
+                return {"timeStamp": opened_challenge[1], "battleId": opened_challenge[0]}, 201
             else:
                 return {"message": "All parameters are required."}, 400
         except InvalidParameter as e:
@@ -117,7 +116,6 @@ def get_unchallenged_battles_or_battle_status():
         return {"message": str(e)}, 400
     except Forbidden as e:
         return {"message": str(e)}, 403
-
 
 # @bc.route('/battles/<battle_id>')
 # @jwt_required()
