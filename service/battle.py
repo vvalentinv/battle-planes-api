@@ -80,6 +80,7 @@ class BattleService:
         messages = {"defense_messages": [], "attack_messages": []}
         data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
         turn = {"turn": ""}
+        params = {"sky": None, "defense": None}
         if validate_int(battle_id):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
@@ -89,6 +90,8 @@ class BattleService:
             raise InvalidParameter("Use battle history")
         if defeat == "True":
             return self.battle_dao.conclude_unfinished_battle(battle_id)
+        params["sky"] = b.get_sky_size()
+        params["defense"] = b.get_defense_size()
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
         cr_attacks = b.get_challenger_attacks() or []
@@ -111,7 +114,6 @@ class BattleService:
                 for bo in body[0]:
                     p.append(bo)
                 data["my_defense"].append(p)
-            print("new b", b)
             data["my_attacks"] = cr_attacks
             data["opponent_attacks"] = cd_attacks
             planes = []
@@ -181,7 +183,7 @@ class BattleService:
                 messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
         else:
             return "Waiting for challenger's defense setup!", None, b.get_battle_turn()
-        return messages, data, turn
+        return messages, data, turn, params
 
     def battle_update(self, user_id, battle_id, attack):
         if validate_int(battle_id) and validate_int(attack):
