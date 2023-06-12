@@ -1,5 +1,7 @@
+import traceback
+
 import flask
-from flask import Blueprint, request
+from flask import Blueprint, request, logging
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from exception.forbidden import Forbidden
@@ -59,15 +61,13 @@ def update_battle(battle_id):
 
     elif request.method == "PUT":
         user_id = get_jwt_identity().get("user_id")
-        print(user_id)
         r_body = request.get_json(silent=True)
-        print(r_body)
         args = request.args
-        print("args", args)
         try:
             defense = args.get('defense')
             accepted = args.get('accepted')
             attack = args.get('attack')
+            print('first try', attack)
             if not len(args) == 1:
                 raise InvalidParameter("Only one query parameter is expected!")
         except InvalidParameter as e:
@@ -109,7 +109,8 @@ def get_unchallenged_battles_or_battle_status():
         battle_id = battle_service.battle_dao.is_engaged(user_id)
         if battle_id and defeat_status:
             return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
-                    "user": get_jwt_identity().get('username')}, 200
+                    "user": get_jwt_identity().get('username'),
+                    "battleID": battle_id}, 200
         return {"battles": battle_service.get_unchallenged_battles(user_id),
                 "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
