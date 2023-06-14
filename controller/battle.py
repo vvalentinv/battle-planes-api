@@ -67,7 +67,6 @@ def update_battle(battle_id):
             defense = args.get('defense')
             accepted = args.get('accepted')
             attack = args.get('attack')
-            print('first try', attack)
             if not len(args) == 1:
                 raise InvalidParameter("Only one query parameter is expected!")
         except InvalidParameter as e:
