@@ -189,6 +189,7 @@ class BattleService:
         if validate_int(battle_id) and validate_int(attack):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
+        attack = int(attack)
         if b is None or b.get_concluded():
             raise Forbidden("Request rejected")
         if attack not in range(b.get_sky_size() * b.get_sky_size()):
@@ -214,7 +215,7 @@ class BattleService:
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
-            if attack in cr_attacks and not len(cr_attacks) > len(cd_attacks):
+            if attack in cr_attacks:  # and not len(cr_attacks) > len(cd_attacks):
                 raise InvalidParameter("Attack already used")
             # challenged player's turn
             elif len(cr_attacks) > len(cd_attacks):
