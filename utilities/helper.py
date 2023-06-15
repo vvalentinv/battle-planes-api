@@ -129,28 +129,32 @@ def evaluate_attack(attacks, planes):
             plane_health.append(i)
         planes_health_list.append(plane_health)
     remaining_defense = list(planes_health_list)
-    print(remaining_defense)
     not_in_defense = True
     for a in attacks:
         for p in planes_health_list:
             if p[0] == a:
                 not_in_defense = False
                 messages.append((a, "Kill"))
-                for plane in remaining_defense:
-                    if plane[0] == a:
-                        remaining_defense.remove(plane)
-            elif a in p:
+            elif a in p and not p[0] == a:
                 not_in_defense = False
-                for plane in remaining_defense:
-                    if a in plane and len(plane) > 1:
-                        plane.remove(a)
-                        if len(plane) == 1:
-                            remaining_defense.remove(plane)
                 messages.append((a, "Hit"))
         if not_in_defense:
             messages.append((a, "Miss"))
+        not_in_defense = True
+    for a in attacks:
+        for p in remaining_defense:
+            if p[0] == a:
+                remaining_defense.remove(p)
+            elif a in p and len(p) > 2:
+                p.remove(a)
+            elif a in p and len(p) == 2:
+                remaining_defense.remove(p)
+                for m in messages:
+                    if m[0] == a and m[1] == "Hit":
+                        m[1] = "Kill"
     if not len(remaining_defense):
         messages.append("Battle won by last attack!")
+    print(messages, attacks)
     return messages
 
 
