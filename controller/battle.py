@@ -7,10 +7,11 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from exception.forbidden import Forbidden
 from exception.invalid_parameter import InvalidParameter
 from service.battle import BattleService
+from service.user import UserService
 
 bc = Blueprint('battle_controller', __name__)
 battle_service = BattleService()
-
+user_service = UserService()
 
 @bc.route('/battles', methods=['POST', 'OPTIONS'])
 @jwt_required()
@@ -106,12 +107,23 @@ def get_unchallenged_battles_or_battle_status():
     try:
         defeat_status = args.get('defeat', None)
         battle_id = battle_service.battle_dao.is_engaged(user_id)
+        opponent_id = None
+        if battle_id:
+            b = battle_service.battle_dao.get_battle_by_id(battle_id)
+            if b.get_challenger_id() == user_id:
+                opponent_id = b.get_challenged_id()
+            else:
+                opponent_id = b.get_challenger_id()
+
         if battle_id and defeat_status:
             return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
                     "user": get_jwt_identity().get('username'),
-                    "battleID": battle_id}, 200
-        return {"battles": battle_service.get_unchallenged_battles(user_id),
-                "user": get_jwt_identity().get('username')}, 200
+                    "battleID": battle_id,
+                    "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
+        else:
+            battle_service.battle_dao.conclude_user_unfinished_battles(user_id)
+            return {"battles": battle_service.get_unchallenged_battles(user_id),
+                    "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
     except Forbidden as e:
