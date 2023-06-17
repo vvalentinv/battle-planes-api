@@ -68,9 +68,7 @@ class BattleService:
                 and validate_array_of_ints(defense) and validate_int(max_time):
             self.battle_dao.conclude_unchallenged_battles(user_id)
             self.battle_dao.conclude_unstarted_battle()
-            if not self.user_dao.get_user_by_id(user_id):
-                raise Forbidden("Request rejected!")
-            elif self.battle_dao.is_engaged(user_id):
+            if self.battle_dao.is_engaged(user_id):
                 raise Forbidden("You are already engaged in another battle")
             battle = Battle(None, None, user_id,
                             None, defense, sky_size, None, None, None, None, False, defense_size, None)
