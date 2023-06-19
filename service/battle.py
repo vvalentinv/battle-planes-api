@@ -78,7 +78,7 @@ class BattleService:
         messages = {"defense_messages": [], "attack_messages": []}
         data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
         turn = {"turn": ""}
-        params = {"sky": None, "defense": None}
+        params = {"sky": None, "defense": None, "time": None}
         if validate_int(battle_id):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
@@ -90,6 +90,7 @@ class BattleService:
             return self.battle_dao.conclude_unfinished_battle(battle_id)
         params["sky"] = b.get_sky_size()
         params["defense"] = b.get_defense_size()
+        params["time"] = b.get_battle_turn()
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
         cr_attacks = b.get_challenger_attacks() or []
