@@ -77,7 +77,7 @@ def random_automatic_attack(attacks, sky_size):
     attacks_set = set(attacks)
     attack = None
     while len(attacks) == len(attacks_set):
-        attack = random.randint(1, sky_size * sky_size)
+        attack = random.randint(0, sky_size * sky_size - 1)
         attacks_set.add(attack)
     return attack
 
