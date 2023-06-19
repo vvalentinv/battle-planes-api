@@ -68,9 +68,7 @@ class BattleService:
                 and validate_array_of_ints(defense) and validate_int(max_time):
             self.battle_dao.conclude_unchallenged_battles(user_id)
             self.battle_dao.conclude_unstarted_battle()
-            if not self.user_dao.get_user_by_id(user_id):
-                raise Forbidden("Request rejected!")
-            elif self.battle_dao.is_engaged(user_id):
+            if self.battle_dao.is_engaged(user_id):
                 raise Forbidden("You are already engaged in another battle")
             battle = Battle(None, None, user_id,
                             None, defense, sky_size, None, None, None, None, False, defense_size, None)
@@ -80,7 +78,7 @@ class BattleService:
         messages = {"defense_messages": [], "attack_messages": []}
         data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
         turn = {"turn": ""}
-        params = {"sky": None, "defense": None}
+        params = {"sky": None, "defense": None, "time": None}
         if validate_int(battle_id):
             pass
         b = self.battle_dao.get_battle_by_id(battle_id)
@@ -92,6 +90,7 @@ class BattleService:
             return self.battle_dao.conclude_unfinished_battle(battle_id)
         params["sky"] = b.get_sky_size()
         params["defense"] = b.get_defense_size()
+        params["time"] = b.get_battle_turn()
         cr = b.get_challenger_id()
         cd = b.get_challenged_id()
         cr_attacks = b.get_challenger_attacks() or []

@@ -72,11 +72,11 @@ class BattleDao:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
-                            "AND Now() < battle_turn  "
+                            "AND Now() < battle_turn + '1 MINUTE' "
                             "UNION "
                             "SELECT id FROM battles "
                             "WHERE concluded IS False AND challenged_id = %s AND "
-                            "challenger_id <> 0 AND Now() < battle_turn", (user_id, user_id))
+                            "challenger_id <> 0 AND Now() < battle_turn + '1 MINUTE'", (user_id, user_id))
                 found = cur.fetchone()
                 if found:
                     return found[0]
@@ -172,6 +172,18 @@ class BattleDao:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
                             "WHERE id = %s"
                             , (battle_id,))
+                return True
+
+    def conclude_user_unfinished_battles(self, user_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
+                            "WHERE battle_turn + '1 MINUTE' < Now() AND " 
+                            "((challenger_id = %s AND coalesce(array_length(challenger_defense, 1), 0) = defense_size) "
+                            "OR (challenged_id = %s AND challenger_id <> 0)) "
+                            , (user_id, user_id))
                 return True
 
     def conclude_unstarted_battle(self):

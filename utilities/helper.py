@@ -77,7 +77,7 @@ def random_automatic_attack(attacks, sky_size):
     attacks_set = set(attacks)
     attack = None
     while len(attacks) == len(attacks_set):
-        attack = random.randint(1, sky_size * sky_size)
+        attack = random.randint(0, sky_size * sky_size - 1)
         attacks_set.add(attack)
     return attack
 
@@ -134,12 +134,12 @@ def evaluate_attack(attacks, planes):
         for p in planes_health_list:
             if p[0] == a:
                 not_in_defense = False
-                messages.append((a, "Kill"))
+                messages.append([a, "Kill"])
             elif a in p and not p[0] == a:
                 not_in_defense = False
-                messages.append((a, "Hit"))
+                messages.append([a, "Hit"])
         if not_in_defense:
-            messages.append((a, "Miss"))
+            messages.append([a, "Miss"])
         not_in_defense = True
     for a in attacks:
         for p in remaining_defense:
