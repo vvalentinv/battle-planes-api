@@ -23,7 +23,8 @@ def login():
         user = auth.login(username, password)
         response = jsonify({"msg": "login successful"})
         access_token = create_access_token(identity={"user_id": user.get_user_id(),
-                                                     "username": user.get_username()})
+                                                     "username": user.get_username(),
+                                                     "email": user.get_email()})
         set_access_cookies(response, access_token)
 
         return response
