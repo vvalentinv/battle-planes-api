@@ -297,3 +297,9 @@ class BattleService:
             data['message'] = "Please resume battle screen"
 
         return data
+
+    def get_battle_result(self, user_id, battle_id):
+        pass
+
+    def get_battle_history(self, user_id):
+        pass

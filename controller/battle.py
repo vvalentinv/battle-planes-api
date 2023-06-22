@@ -108,6 +108,7 @@ def get_unchallenged_battles_or_battle_status():
         history = args.get('history', None)
         defeat_status = args.get('defeat', None)
         battle_id = battle_service.battle_dao.is_engaged(user_id)
+        battles = battle_service.battle_dao.get_battle_id_list(user_id)
         opponent_id = None
         if battle_id:
             b = battle_service.battle_dao.get_battle_by_id(battle_id)
@@ -122,11 +123,10 @@ def get_unchallenged_battles_or_battle_status():
                     "battleID": battle_id,
                     "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
         elif history:
-            pass
-            # return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
-            #         "user": get_jwt_identity().get('username'),
-            #         "battleID": battle_id,
-            #         "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
+            if history == 'all':
+                return {"history": battle_service.get_battle_history(user_id, battles)}, 200
+            elif history == "last":
+                return {"outcome": battle_service.get_battle_result(user_id, battle_id)}, 200
         else:
             battle_service.battle_dao.conclude_user_unfinished_battles(user_id)
             return {"battles": battle_service.get_unchallenged_battles(user_id),
