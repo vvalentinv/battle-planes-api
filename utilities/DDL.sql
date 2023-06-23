@@ -66,13 +66,13 @@ select * from planes p ;
 select * from battles b ;
 delete from battles;
 
-SELECT (SELECT challenger_id 
+Select id
 		FROM battles
         WHERE concluded IS False AND challenger_id = 2 AND Now() < battle_turn + interval '15 MINUTE'   
 		UNION
-     	SELECT challenged_id 
+     	SELECT id 
      	FROM battles 
-     	WHERE concluded IS False AND challenged_id = 2 AND challenger_id <> 0 AND Now() < battle_turn + interval '15 MINUTE' )
+     	WHERE concluded IS False AND challenged_id = 2 AND challenger_id <> 0 AND Now() < battle_turn 
      	 = 2;
 
 SELECT * FROM battles WHERE challenger_id = 1 and (cardinality(challenger_defense) < defense_size or cardinality(challenger_defense ) = NULL )and concluded = False;

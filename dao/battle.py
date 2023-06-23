@@ -238,3 +238,18 @@ class BattleDao:
                                           b[9], b[10], b[11], b[12])
                 else:
                     return None
+
+    def get_battle_id_list(self, user_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id FROM battles WHERE (challenger_id = %s OR challenged_id = %s) AND "
+                            "coalesce(array_length(challenger_defense, 1), 0) = defense_size AND concluded = True",
+                            (user_id, user_id))
+                b_id = cur.fetchone()
+                result = []
+                while b_id:
+                    result.append(b_id)
+                    b_id = cur.fetchone()
+                return result
