@@ -5,7 +5,8 @@
 Battle-Planes is a Battleships similar game where all targets have a 10-square shape. 
 
 - [x] TO DO update ERD as the project scales in complexity
-[ERD](/utilities/battle-planes-api.pdf)
+      
+![image](/utilities/battle-planes-api-ERD.jpg)
 - [x] TO DO add read only JWT based authentication
 
 Python battle-planes backend with the following endpoints:
