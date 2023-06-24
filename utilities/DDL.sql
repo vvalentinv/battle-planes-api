@@ -51,19 +51,10 @@ CREATE TABLE battles(
 CREATE TABLE battle_results(
 	id SERIAL PRIMARY KEY,
 	battle_id INT NOT NULL,
-	challenger_id INT NOT NULL,
-	challenged_id INT NOT NULL,
-	winner TEXT,
-	disconnected_user TEXT,
-	sky_size INT NOT NULL,
-	defense_size INT NOT NULL,
-	concluded TIMESTAMPTZ,
+	winner INT,
+	disconnected_user INT,
 	CONSTRAINT fk_br_battle_id
-  		FOREIGN KEY (battle_id) REFERENCES "battles" (id),
-	CONSTRAINT fk_br_challenger_id
-  		FOREIGN KEY (challenger_id) REFERENCES "users" (id),
-  	CONSTRAINT fk_br_challenged_id
-  		FOREIGN KEY (challenged_id) REFERENCES "users" (id)
+  		FOREIGN KEY (battle_id) REFERENCES "battles" (id)
 );
 
 
