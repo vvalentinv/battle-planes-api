@@ -1,7 +1,8 @@
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS flight_directions
-DROP TABLE IF EXISTS planes;
+DROP TABLE IF EXISTS battle_results;
 DROP TABLE IF EXISTS battles; 
+DROP TABLE IF EXISTS planes;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS flight_directions;
 
 CREATE EXTENSION IF NOT EXISTS intarray;
 
@@ -46,6 +47,16 @@ CREATE TABLE battles(
   	CONSTRAINT fk_challenged_id
   		FOREIGN KEY (challenged_id) REFERENCES "users" (id)
 );
+
+CREATE TABLE battle_results(
+	id SERIAL PRIMARY KEY,
+	battle_id INT NOT NULL,
+	winner INT,
+	disconnected_user INT,
+	CONSTRAINT fk_br_battle_id
+  		FOREIGN KEY (battle_id) REFERENCES "battles" (id)
+);
+
 
 INSERT INTO users (id, username, pass, email) VALUES (0, 'default-challenger', '', '');
 INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4, 'West');
