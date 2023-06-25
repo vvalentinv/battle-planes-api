@@ -167,7 +167,22 @@ class BattleDao:
                     return True
                 return None
 
-    def conclude_unfinished_battle(self, battle_id):
+    def conclude_unfinished_battle(self, battle_id, disconnected_user):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
+                            "WHERE id = %s RETURNING *"
+                            , (battle_id,))
+                b = cur.fetchone()
+                if b:
+                    cur.execute("INSERT INTO battle_results (battle_id, disconnected_user) VALUES (%s, %s) RETURNING *",
+                                (battle_id, disconnected_user))
+                    if cur.fetchone():
+                        return True
+
+    def conclude_unfinished_defense_battle(self, battle_id):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:

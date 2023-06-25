@@ -23,7 +23,7 @@ class BattleService:
             if b is None:
                 raise InvalidParameter("Request rejected1")
             if not self.battle_dao.is_time_left(b.get_battle_id()):
-                self.battle_dao.conclude_unfinished_battle(battle_id)
+                self.battle_dao.conclude_unfinished_defense_battle(battle_id)
                 raise Forbidden("Time frame to add planes for defense setup elapsed.")
             existing_defense = b.get_challenger_defense() or []
             print(existing_defense)
@@ -103,7 +103,7 @@ class BattleService:
         # conclude challenged unfinished defense setups
         if not cr == 0 and not len(cr_defense) == len(cd_defense) \
                 and not in_time:
-            self.battle_dao.conclude_unfinished_battle(battle_id)
+            self.battle_dao.conclude_unfinished_defense_battle(battle_id)
         elif user_id == cr and len(cr_defense) == len(cd_defense):
             for p_id in cr_defense:
                 p = []
@@ -130,7 +130,7 @@ class BattleService:
                 check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress) \
                         and not check_progress(cr_attacks, my_planes, b.get_defense_size()):
-                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    self.battle_dao.conclude_unfinished_battle(battle_id, cd)
                     return "Battle inconclusive by opponent disconnect."
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) and not in_time:
@@ -168,7 +168,7 @@ class BattleService:
                 check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress) \
                         and not check_progress(cd_attacks, my_planes, b.get_defense_size()):
-                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     return "Battle inconclusive by player disconnect."
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) + 1 and not in_time:
@@ -232,7 +232,7 @@ class BattleService:
                 check_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
                         and not check_progress(cd_attacks, cr_planes, def_size):
-                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     messages.append("Battle inconclusive by player disconnect.")
                 if messages[-1] == "Battle won by last attack!":
                     self.battle_dao.conclude_won_battle(battle_id)
@@ -254,7 +254,7 @@ class BattleService:
                 check_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_overall_progress) \
                         and not check_progress(cr_attacks, cd_planes, def_size):
-                    self.battle_dao.conclude_unfinished_battle(battle_id)
+                    self.battle_dao.conclude_unfinished_battle(battle_id, cd)
                     messages.append("Battle inconclusive by player disconnect.")
 
                 if messages[-1] == "Battle won by last attack!":
@@ -265,7 +265,7 @@ class BattleService:
         data = {'message': "", 'battles': []}
         if self.battle_dao.is_engaged(user_id):
             data['message'] = "Finish your current battle engagement, before attempting a new one!"
-        unchallenged_battles = self.battle_dao.get_unchallenged_battles(user_id) or []
+        unchallenged_battles = self.battle_dao.get_unchallenged_battles() or []
         data['battles'] = []
         battle = self.battle_dao.get_defense_setup_for_challenger(user_id)
         defense = []
