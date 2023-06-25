@@ -129,8 +129,8 @@ def get_unchallenged_battles_or_battle_status():
         elif query_battle_id:
             return {"outcome": battle_service.get_battle_result(user_id, battle_id)}, 200
         elif battle_id and defeat_status == 'True':
-            battle_service.battle_dao.conclude_user_unfinished_battles(user_id)
-            return {"battles": battle_service.get_unchallenged_battles(user_id),
+            battle_service.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
+            return {"battles": battle_service.get_unchallenged_battles(),
                     "user": get_jwt_identity().get('username')}, 200
     except InvalidParameter as e:
         return {"message": str(e)}, 400
