@@ -301,5 +301,5 @@ class BattleService:
     def get_battle_result(self, user_id, battle_id):
         pass
 
-    def get_battle_history(self, user_id):
+    def get_battle_history(self, user_id, battles):
         pass
