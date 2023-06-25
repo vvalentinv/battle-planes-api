@@ -235,7 +235,7 @@ class BattleService:
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     messages.append("Battle inconclusive by player disconnect.")
                 if messages[-1] == "Battle won by last attack!":
-                    self.battle_dao.conclude_won_battle(battle_id)
+                    self.battle_dao.conclude_won_battle(battle_id, cr)
         else:
             if attack in cd_attacks and not len(cr_attacks) == len(cd_attacks):
                 raise InvalidParameter("Attack already used")
@@ -258,7 +258,7 @@ class BattleService:
                     messages.append("Battle inconclusive by player disconnect.")
 
                 if messages[-1] == "Battle won by last attack!":
-                    self.battle_dao.conclude_won_battle(battle_id)
+                    self.battle_dao.conclude_won_battle(battle_id, cd)
         return messages
 
     def get_unchallenged_battles(self, user_id):

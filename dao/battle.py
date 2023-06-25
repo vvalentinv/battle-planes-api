@@ -222,16 +222,19 @@ class BattleDao:
                             )
                 return True
 
-    def conclude_won_battle(self, battle_id):
+    def conclude_won_battle(self, battle_id, winner):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
-                            "WHERE id = %s"
+                            "WHERE id = %s RETURNING *"
                             , (battle_id,))
-                print("won")
-                return True
+                if cur.fetchone():
+                    cur.execute("INSERT INTO battle_results (battle_id, winner) VALUES (%s, %s) RETURNING *",
+                                (battle_id, winner))
+                    return True
+
 
     def get_unchallenged_battles(self):
         with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
