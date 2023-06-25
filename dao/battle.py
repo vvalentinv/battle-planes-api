@@ -15,7 +15,7 @@ class BattleDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_defense=%s WHERE id=%s RETURNING *"
+                cur.execute("UPDATE battles SET challenger_defense=%s,  WHERE id=%s RETURNING *"
                             , (planes_array, battle_id))
                 b = cur.fetchone()
                 if b:
@@ -23,6 +23,9 @@ class BattleDao:
                     curr_def = battle.get_challenger_defense() or []
                     if battle.get_defense_size() == len(curr_def):
                         return "Defense setup complete!"
+                    else:
+                        cur.execute("UPDATE battles SET battle_turn = Now() + '%s MINUTE',  WHERE id=%s RETURNING *"
+                                    , (battle.get_defense_size() - len(curr_def), battle_id))
                     return f"{battle.get_defense_size() - len(curr_def)} more plane(s) to add " \
                            f"until defense setup is complete."
                 return None
