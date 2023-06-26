@@ -281,3 +281,15 @@ class BattleDao:
                     result.append(b_id)
                     b_id = cur.fetchone()
                 return result
+
+    def get_battle_result(self, battle_id):
+        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
+                              password=os.getenv("db_password"), host=os.getenv("db_host"),
+                              port=os.getenv("db_port")) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT winner, disconnected_user FROM battle_results WHERE battle_id = %s",
+                            (battle_id,))
+                result = cur.fetchone()
+                if result:
+                    return result[0], result[1]
+                return None
