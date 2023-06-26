@@ -87,7 +87,7 @@ class BattleService:
         if b.get_concluded():
             raise InvalidParameter("Use battle history")
         if defeat == "True":
-            return self.battle_dao.conclude_unfinished_battle(battle_id)
+            return self.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
         params["sky"] = b.get_sky_size()
         params["defense"] = b.get_defense_size()
         params["time"] = b.get_battle_turn()
@@ -295,11 +295,71 @@ class BattleService:
                 data['battles'].append([b_id, defense, username, sky, b.get_battle_turn()])
         else:
             data['message'] = "Please resume battle screen"
-
         return data
 
     def get_battle_result(self, user_id, battle_id):
-        pass
+        messages = {"defense_messages": [], "attack_messages": []}
+        data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
+        params = {"sky": None, "defense": None, "time": None}
+        if validate_int(battle_id):
+            pass
+        b = self.battle_dao.get_battle_by_id(battle_id)
+        if not b.get_concluded():
+            return "Unfinished battle"
+        params["sky"] = b.get_sky_size()
+        params["defense"] = b.get_defense_size()
+        params["time"] = b.get_battle_turn()
+        cr = b.get_challenger_id()
+        cd = b.get_challenged_id()
+        cr_attacks = b.get_challenger_attacks() or []
+        cd_attacks = b.get_challenged_attacks() or []
+        cr_defense = b.get_challenger_defense() or []
+        cd_defense = b.get_challenged_defense() or []
+        if b and user_id == cr:
+            for p_id in cr_defense:
+                p = []
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                p.append(plane.get_cockpit())
+                body = plane.get_body()
+                for bo in body[0]:
+                    p.append(bo)
+                data["my_defense"].append(p)
+            data["my_attacks"] = cr_attacks
+            data["opponent_attacks"] = cd_attacks
+            planes = []
+            for plane_id in cd_defense:
+                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in cr_defense:
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
+            messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
+        elif user_id == cd:
+            for p_id in cd_defense:
+                p = []
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                p.append(plane.get_cockpit())
+                body = plane.get_body()
+                for bo in body[0]:
+                    p.append(bo)
+                data["my_defense"].append(p)
+            data["my_attacks"] = cd_attacks
+            data["opponent_attacks"] = cr_attacks
+            planes = []
+            for plane_id in cr_defense:
+                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in cd_defense:
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
+            messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
+        battle_result = self.battle_dao.get_battle_result(battle_id)
+        winner = None
+        disconnected = None
+        if battle_result:
+            winner = battle_result[0]
+            disconnected = battle_result[1]
+        return {'messages': messages, 'data': data, 'params': params, 'winner': winner, 'disconnected': disconnected}
 
     def get_battle_history(self, user_id, battles):
         pass
