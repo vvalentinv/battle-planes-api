@@ -361,5 +361,19 @@ class BattleService:
             disconnected = battle_result[1]
         return {'messages': messages, 'data': data, 'params': params, 'winner': winner, 'disconnected': disconnected}
 
-    def get_battle_history(self, user_id, battles):
-        pass
+    def get_battle_history(self, user_id, battle_ids):
+        battles = [self.battle_dao.get_battle_by_id(i) for i in battle_ids]
+        battles_results = [self.battle_dao.get_battle_result(i) for i in battle_ids]
+        i = 0
+        data = []
+        while i < len(battles):
+            data.append({'id': battles[i].get_battle_id(),
+                         'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
+                         battles[i].get_challenged_id(),
+                         'concluded-at': battles[i].get_battle_turn(),
+                         'winner': battles_results[i][0] if battles_results[i] is not None else 'Unavailable',
+                         'disconnected': battles_results[i][1] if battles_results[i] is not None else 'Unavailable'})
+            i += 1
+        print(data)
+        return data
+
