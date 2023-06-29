@@ -13,6 +13,7 @@ bc = Blueprint('battle_controller', __name__)
 battle_service = BattleService()
 user_service = UserService()
 
+
 @bc.route('/battles', methods=['POST', 'OPTIONS'])
 @jwt_required()
 def add_battle():
@@ -102,40 +103,50 @@ def update_battle(battle_id):
 def get_unchallenged_battles_or_battle_status():
     # accepts another player's challenge and sets the defense setup timeframe limit (number of planes = minutes)
     # TO DO get user_id from read-only cookie and pass it as param to service layer
-    user_id = get_jwt_identity().get("user_id")
-    args = request.args
-    try:
-        history = args.get('history', None)
-        defeat_status = args.get('defeat', None)
-        query_battle_id = args.get('battleID', None)
-        battle_id = battle_service.battle_dao.is_engaged(user_id)
-        battles = battle_service.battle_dao.get_battle_id_list(user_id)
-        opponent_id = None
-        if battle_id:
-            b = battle_service.battle_dao.get_battle_by_id(battle_id)
-            if b.get_challenger_id() == user_id:
-                opponent_id = b.get_challenged_id()
-            else:
-                opponent_id = b.get_challenger_id()
+    if request.method == "OPTIONS":
+        resp = flask.Response("preflight")
+        resp.headers["Access-Control-Allow-Origin"] = "http://127.0.0.1:5500"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, Content-Length, Access-Control-Allow-Credentials"
+        resp.headers["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+        resp.headers['Access-Control-Allow-Credentials'] = 'true'
+        return resp
 
-        if battle_id and defeat_status == 'False':
-            return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
-                    "user": get_jwt_identity().get('username'),
-                    "battleID": battle_id,
-                    "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
-        elif history:
-            if history:
-                return {"history": battle_service.get_battle_history(user_id, battles)}, 200
-        elif query_battle_id:
-            return {"outcome": battle_service.get_battle_result(user_id, battle_id)}, 200
-        elif battle_id and defeat_status == 'True':
-            battle_service.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
-            return {"battles": battle_service.get_unchallenged_battles(),
+    elif request.method == "GET":
+
+        user_id = get_jwt_identity().get("user_id")
+        args = request.args
+        try:
+            history = args.get('history', None)
+            defeat_status = args.get('defeat', None)
+            query_battle_id = args.get('battleID', None)
+            battle_id = battle_service.battle_dao.is_engaged(user_id)
+            battles = battle_service.battle_dao.get_battle_id_list(user_id)
+            opponent_id = None
+            if battle_id:
+                b = battle_service.battle_dao.get_battle_by_id(battle_id)
+                if b.get_challenger_id() == user_id:
+                    opponent_id = b.get_challenged_id()
+                else:
+                    opponent_id = b.get_challenger_id()
+
+            if battle_id and defeat_status == 'False':
+                return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
+                        "user": get_jwt_identity().get('username'),
+                        "battleID": battle_id,
+                        "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
+            elif history:
+                if history:
+                    return {"history": battle_service.get_battle_history(user_id, battles)}, 200
+            elif query_battle_id:
+                return {"outcome": battle_service.get_battle_result(user_id, battle_id)}, 200
+            elif battle_id and defeat_status == 'True':
+                battle_service.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
+            return {"battles": battle_service.get_unchallenged_battles(user_id),
                     "user": get_jwt_identity().get('username')}, 200
-    except InvalidParameter as e:
-        return {"message": str(e)}, 400
-    except Forbidden as e:
-        return {"message": str(e)}, 403
+        except InvalidParameter as e:
+            return {"message": str(e)}, 400
+        except Forbidden as e:
+            return {"message": str(e)}, 403
 
 # @bc.route('/battles/<battle_id>')
 # @jwt_required()

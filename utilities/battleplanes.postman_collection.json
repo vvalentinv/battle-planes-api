@@ -66,13 +66,13 @@
 			"response": []
 		},
 		{
-			"name": "update password",
+			"name": "POST /login jcad4",
 			"request": {
-				"method": "PUT",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"password\": \"Password123!\",\r\n    \"email\": \"changed\"\r\n}",
+					"raw": "{\r\n    \"username\": \"jcad1\",\r\n    \"password\": \"Password123!!\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -80,7 +80,69 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/users/1",
+					"raw": "http://localhost:5000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /login jcad2",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"jcad2\",\r\n    \"password\": \"Password123!!\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "update password",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token_cookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY4NDUwNjQ5MywianRpIjoiZWNhY2ZjZWItYWM1NC00ODZiLWFhNWMtNjM5NTcyMDczODIwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VyX2lkIjo0LCJ1c2VybmFtZSI6ImpjYWQ0In0sIm5iZiI6MTY4NDUwNjQ5MywiZXhwIjoxNjg0NTEwMDkzfQ.EJMlc7YGYkefvGDYpEmZ0RTfa7HXhK0-bi7zUsOn3cs; HttpOnly; Path=/",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"password\": \"Password123!!\",\r\n    \"new_password\": \"Password123!!2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/users",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -90,8 +152,7 @@
 					],
 					"port": "5000",
 					"path": [
-						"users",
-						"1"
+						"users"
 					]
 				}
 			},
@@ -195,10 +256,16 @@
 			"name": "accept challenge",
 			"request": {
 				"method": "PUT",
-				"header": [],
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token_cookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY4NDY1NzcxOSwianRpIjoiNDhjZjhjYjQtZGEzMS00NjExLWFmOGQtYTc2NTExNWZmMmM1IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VyX2lkIjoxLCJ1c2VybmFtZSI6ImpjYWQxIn0sIm5iZiI6MTY4NDY1NzcxOSwiZXhwIjoxNjg0NjYxMzE5fQ.2T3q-WuN45nD5zfSJTeK9eGzXbnIWTMki_ksyJZpliw",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \r\n}",
+					"raw": "",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -206,7 +273,7 @@
 					}
 				},
 				"url": {
-					"raw": "http://127.0.0.1:5000/battles/80?accepted=True",
+					"raw": "http://127.0.0.1:5000/battles/86?accepted=True",
 					"protocol": "http",
 					"host": [
 						"127",
@@ -217,7 +284,7 @@
 					"port": "5000",
 					"path": [
 						"battles",
-						"80"
+						"86"
 					],
 					"query": [
 						{
@@ -409,6 +476,89 @@
 					"query": [
 						{
 							"key": "attack",
+							"value": "True"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get plane",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token_cookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY4NTcxNDI4OSwianRpIjoiNzYxM2NlOTItZGJkNy00YjkxLWI1Y2ItNDI0ZmIzOTFkODA0IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImpjYWQyIn0sIm5iZiI6MTY4NTcxNDI4OSwiZXhwIjoxNjg1NzE3ODg5fQ.xoaH8-SCfBhNmrUdpjULdiUBrG7lgiHJ0nwBYDfyysc",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"cockpit\": 2,\r\n    \"direction\": \"1\",\r\n    \"sky\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/planes",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"planes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get history",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "access_token_cookie=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY4Nzg1OTM3NCwianRpIjoiMzgzZDQ5ZTQtYTYwYy00NGQ0LTk4NjYtYjBjMjdiMjk3ODQ4IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJ1c2VyX2lkIjoyLCJ1c2VybmFtZSI6ImpjYWQyIiwiZW1haWwiOiJhMkBhLmNhIn0sIm5iZiI6MTY4Nzg1OTM3NCwiZXhwIjoxNjg3ODYyOTc0fQ.BV9W-JCZKALdFQUqkVamb5GK7Sy3ypaTyXjksLhtF0Y",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"max-time\": 30,\r\n    \"defense\": [125, 52, 13],\r\n    \"defense-size\": 3,\r\n    \"sky-size\": 10\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:5000/battles?history=True",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "5000",
+					"path": [
+						"battles"
+					],
+					"query": [
+						{
+							"key": "history",
 							"value": "True"
 						}
 					]

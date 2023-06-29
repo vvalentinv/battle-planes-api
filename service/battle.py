@@ -87,7 +87,7 @@ class BattleService:
         if b.get_concluded():
             raise InvalidParameter("Use battle history")
         if defeat == "True":
-            return self.battle_dao.conclude_unfinished_battle(battle_id)
+            return self.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
         params["sky"] = b.get_sky_size()
         params["defense"] = b.get_defense_size()
         params["time"] = b.get_battle_turn()
@@ -123,15 +123,19 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
+            if messages["attack_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cr)
+            if messages["defense_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cd)
             if len(cr_attacks) == len(cd_attacks) and in_time:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) - 1 == len(cd_attacks) and in_time:
                 turn["turn"] = "Wait for your opponent's attack."
-                check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
+                check_opponent_overall_progress = check_progress(cd_attacks, my_planes, cd_rnd_attacks)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress) \
-                        and not check_progress(cr_attacks, my_planes, b.get_defense_size()):
+                        and not check_progress(cr_attacks, planes, cr_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cd)
-                    return "Battle inconclusive by opponent disconnect."
+                    return "Battle inconclusive by opponent disconnect and no kills"
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) and not in_time:
                 attack = random_automatic_attack(cr_attacks, b.get_sky_size())
@@ -161,15 +165,19 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
+            if messages["attack_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cd)
+            if messages["defense_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cr)
             if len(cr_attacks) == len(cd_attacks) + 1 and in_time:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks) and in_time:
                 turn["turn"] = "Wait for your opponent's attack."
-                check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
+                check_opponent_overall_progress = check_progress(cr_attacks, my_planes, cr_rnd_attacks)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress) \
-                        and not check_progress(cd_attacks, my_planes, b.get_defense_size()):
+                        and not check_progress(cd_attacks, planes, cd_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
-                    return "Battle inconclusive by player disconnect."
+                    return "Battle inconclusive by player disconnect and no kill"
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) + 1 and not in_time:
                 attack = random_automatic_attack(cd_attacks, b.get_sky_size())
@@ -229,9 +237,9 @@ class BattleService:
                 # Next var determines if a battle is finished playing against random attacks or inconclusive by
                 # disconnection
                 messages = evaluate_attack(cr_attacks, cd_planes)
-                check_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
+                check_overall_progress = check_progress(cr_attacks, cd_planes, cr_rnd_attacks)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
-                        and not check_progress(cd_attacks, cr_planes, def_size):
+                        and not check_progress(cd_attacks, cr_planes, cd_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     messages.append("Battle inconclusive by player disconnect.")
                 if messages[-1] == "Battle won by last attack!":
@@ -251,9 +259,9 @@ class BattleService:
                 # Next var determines if a battle is finished playing against random attacks or inconclusive by
                 # disconnection
                 messages = evaluate_attack(cd_attacks, cr_planes)
-                check_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
+                check_overall_progress = check_progress(cd_attacks, cr_planes, cd_rnd_attacks)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_overall_progress) \
-                        and not check_progress(cr_attacks, cd_planes, def_size):
+                        and not check_progress(cr_attacks, cd_planes, cr_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cd)
                     messages.append("Battle inconclusive by player disconnect.")
 
@@ -295,11 +303,86 @@ class BattleService:
                 data['battles'].append([b_id, defense, username, sky, b.get_battle_turn()])
         else:
             data['message'] = "Please resume battle screen"
-
         return data
 
     def get_battle_result(self, user_id, battle_id):
-        pass
+        messages = {"defense_messages": [], "attack_messages": []}
+        data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
+        params = {"sky": None, "defense": None, "time": None}
+        if validate_int(battle_id):
+            pass
+        b = self.battle_dao.get_battle_by_id(battle_id)
+        if not b.get_concluded():
+            return "Unfinished battle"
+        params["sky"] = b.get_sky_size()
+        params["defense"] = b.get_defense_size()
+        params["time"] = b.get_battle_turn()
+        cr = b.get_challenger_id()
+        cd = b.get_challenged_id()
+        cr_attacks = b.get_challenger_attacks() or []
+        cd_attacks = b.get_challenged_attacks() or []
+        cr_defense = b.get_challenger_defense() or []
+        cd_defense = b.get_challenged_defense() or []
+        if b and user_id == cr:
+            for p_id in cr_defense:
+                p = []
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                p.append(plane.get_cockpit())
+                body = plane.get_body()
+                for bo in body[0]:
+                    p.append(bo)
+                data["my_defense"].append(p)
+            data["my_attacks"] = cr_attacks
+            data["opponent_attacks"] = cd_attacks
+            planes = []
+            for plane_id in cd_defense:
+                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in cr_defense:
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
+            messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
+        elif user_id == cd:
+            for p_id in cd_defense:
+                p = []
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                p.append(plane.get_cockpit())
+                body = plane.get_body()
+                for bo in body[0]:
+                    p.append(bo)
+                data["my_defense"].append(p)
+            data["my_attacks"] = cd_attacks
+            data["opponent_attacks"] = cr_attacks
+            planes = []
+            for plane_id in cr_defense:
+                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            my_planes = []
+            for plane_id in cd_defense:
+                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
+            messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
+        battle_result = self.battle_dao.get_battle_result(battle_id)
+        winner = None
+        disconnected = None
+        if battle_result:
+            winner = battle_result[0]
+            disconnected = battle_result[1]
+        return {'messages': messages, 'data': data, 'params': params, 'winner': winner, 'disconnected': disconnected}
 
-    def get_battle_history(self, user_id, battles):
-        pass
+    def get_battle_history(self, user_id, battle_ids):
+        battles = [self.battle_dao.get_battle_by_id(i) for i in battle_ids]
+        battles_results = [self.battle_dao.get_battle_result(i) for i in battle_ids]
+        i = 0
+        data = []
+        while i < len(battle):
+            data.append({'id': battles[i].get_battle_id(),
+                         'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
+                         battles[i].get_challenged_id(),
+                         'concluded-at': battles[i].get_battle_turn(),
+                         'winner': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
+                         if battles_results[i] is not None else 'Unavailable',
+                         'disconnected': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
+                         if battles_results[i] is not None else 'Unavailable'})
+            i += 1
+        print(data)
+        return data

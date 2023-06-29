@@ -63,7 +63,7 @@ INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4
 
 INSERT INTO battles (challenger_id, challenged_id, challenger_defense, challenged_defense, challenger_attacks, challenged_attacks, rnd_attack_ed, concluded, battle_turn) VALUES 
 					(2, 1, array[1,2,3], array[1,2,3], array[0, 9, 90, 99], array[0, 9, 90, 99], array[0, 9, 90, 99], False, Now() + interval '3 MINUTE');
-update battles set concluded  = true  WHERE id = 143;
+update battles set concluded  = true  WHERE id = 139 RETURNING *;
 SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
 select (Select battle_turn from battles b Where id = 185) > Now();
 select * from planes where id IN(125,88);
