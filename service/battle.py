@@ -123,6 +123,10 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
+            if messages["attack_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cr)
+            if messages["defense_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cd)
             if len(cr_attacks) == len(cd_attacks) and in_time:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) - 1 == len(cd_attacks) and in_time:
@@ -161,6 +165,10 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
+            if messages["attack_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cd)
+            if messages["defense_messages"][-1] == "Battle won by last attack!":
+                self.battle_dao.conclude_won_battle(battle_id, cr)
             if len(cr_attacks) == len(cd_attacks) + 1 and in_time:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks) and in_time:
@@ -366,14 +374,15 @@ class BattleService:
         battles_results = [self.battle_dao.get_battle_result(i) for i in battle_ids]
         i = 0
         data = []
-        while i < len(battles):
+        while i < len(battle):
             data.append({'id': battles[i].get_battle_id(),
                          'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
                          battles[i].get_challenged_id(),
                          'concluded-at': battles[i].get_battle_turn(),
-                         'winner': battles_results[i][0] if battles_results[i] is not None else 'Unavailable',
-                         'disconnected': battles_results[i][1] if battles_results[i] is not None else 'Unavailable'})
+                         'winner': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
+                         if battles_results[i] is not None else 'Unavailable',
+                         'disconnected': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
+                         if battles_results[i] is not None else 'Unavailable'})
             i += 1
         print(data)
         return data
-
