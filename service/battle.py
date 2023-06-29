@@ -127,11 +127,11 @@ class BattleService:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) - 1 == len(cd_attacks) and in_time:
                 turn["turn"] = "Wait for your opponent's attack."
-                check_opponent_overall_progress = check_progress(cd_attacks, planes, b.get_defense_size())
+                check_opponent_overall_progress = check_progress(cd_attacks, my_planes, cd_rnd_attacks)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_opponent_overall_progress) \
-                        and not check_progress(cr_attacks, my_planes, b.get_defense_size()):
+                        and not check_progress(cr_attacks, planes, cr_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cd)
-                    return "Battle inconclusive by opponent disconnect."
+                    return "Battle inconclusive by opponent disconnect and no kills"
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) and not in_time:
                 attack = random_automatic_attack(cr_attacks, b.get_sky_size())
@@ -165,11 +165,11 @@ class BattleService:
                 turn["turn"] = "This is your turn to attack."
             elif len(cr_attacks) == len(cd_attacks) and in_time:
                 turn["turn"] = "Wait for your opponent's attack."
-                check_opponent_overall_progress = check_progress(cr_attacks, planes, b.get_defense_size())
+                check_opponent_overall_progress = check_progress(cr_attacks, my_planes, cr_rnd_attacks)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_opponent_overall_progress) \
-                        and not check_progress(cd_attacks, my_planes, b.get_defense_size()):
+                        and not check_progress(cd_attacks, planes, cd_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
-                    return "Battle inconclusive by player disconnect."
+                    return "Battle inconclusive by player disconnect and no kill"
             # perform auto attack if turn expired
             elif len(cr_attacks) == len(cd_attacks) + 1 and not in_time:
                 attack = random_automatic_attack(cd_attacks, b.get_sky_size())
@@ -229,9 +229,9 @@ class BattleService:
                 # Next var determines if a battle is finished playing against random attacks or inconclusive by
                 # disconnection
                 messages = evaluate_attack(cr_attacks, cd_planes)
-                check_overall_progress = check_progress(cr_attacks, cd_planes, def_size)
+                check_overall_progress = check_progress(cr_attacks, cd_planes, cr_rnd_attacks)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
-                        and not check_progress(cd_attacks, cr_planes, def_size):
+                        and not check_progress(cd_attacks, cr_planes, cd_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     messages.append("Battle inconclusive by player disconnect.")
                 if messages[-1] == "Battle won by last attack!":
@@ -251,9 +251,9 @@ class BattleService:
                 # Next var determines if a battle is finished playing against random attacks or inconclusive by
                 # disconnection
                 messages = evaluate_attack(cd_attacks, cr_planes)
-                check_overall_progress = check_progress(cd_attacks, cr_planes, def_size)
+                check_overall_progress = check_progress(cd_attacks, cr_planes, cd_rnd_attacks)
                 if evaluate_disconnect(cd_attacks, cd_rnd_attacks, check_overall_progress) \
-                        and not check_progress(cr_attacks, cd_planes, def_size):
+                        and not check_progress(cr_attacks, cd_planes, cr_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cd)
                     messages.append("Battle inconclusive by player disconnect.")
 
