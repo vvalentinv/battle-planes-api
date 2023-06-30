@@ -374,7 +374,7 @@ class BattleService:
         battles_results = [self.battle_dao.get_battle_result(i) for i in battle_ids]
         i = 0
         data = []
-        while i < len(battle):
+        while i < len(battles):
             data.append({'id': battles[i].get_battle_id(),
                          'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
                          battles[i].get_challenged_id(),
