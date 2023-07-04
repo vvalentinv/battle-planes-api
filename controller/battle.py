@@ -129,7 +129,7 @@ def get_unchallenged_battles_or_battle_status():
                 else:
                     opponent_id = b.get_challenger_id()
 
-            if battle_id and defeat_status == 'False':
+            if battle_id and defeat_status == 'False' and query_battle_id:
                 return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
                         "user": get_jwt_identity().get('username'),
                         "battleID": battle_id,
@@ -137,8 +137,8 @@ def get_unchallenged_battles_or_battle_status():
             elif history:
                 if history:
                     return {"history": battle_service.get_battle_history(user_id, battles)}, 200
-            elif query_battle_id:
-                return {"outcome": battle_service.get_battle_result(user_id, battle_id)}, 200
+            elif query_battle_id and not battle_id:
+                return {"outcome": battle_service.get_battle_result(user_id, query_battle_id)}, 200
             elif battle_id and defeat_status == 'True':
                 battle_service.battle_dao.conclude_user_conceded_battles(user_id, battle_id)
             return {"battles": battle_service.get_unchallenged_battles(user_id),

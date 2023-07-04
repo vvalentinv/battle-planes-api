@@ -43,7 +43,7 @@ def update_user():
         user_id = get_jwt_identity().get("user_id")
         try:
             n_pwd = r_body.get('new-password', None)
-            password = r_body.get('password', None)
+            password = r_body.get('current-password', None)
             email = r_body.get('email', None)
             updated_user = user_service.update_user(user_id, password, n_pwd, email)
             return {"message": updated_user}, 200
