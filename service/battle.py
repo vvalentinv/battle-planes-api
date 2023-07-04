@@ -66,10 +66,21 @@ class BattleService:
     def add_battle(self, user_id, defense, defense_size, sky_size, max_time):
         if validate_int(defense_size) and validate_int(sky_size) \
                 and validate_array_of_ints(defense) and validate_int(max_time):
-            self.battle_dao.conclude_unchallenged_battles(user_id)
-            self.battle_dao.conclude_unstarted_battle()
             if self.battle_dao.is_engaged(user_id):
                 raise Forbidden("You are already engaged in another battle")
+            if not int(defense_size) == len(defense):
+                raise InvalidParameter("Defense size not matching # of selected planes!")
+            # Validate defense
+            validated_defense = []
+            for p_id in defense:
+                plane = self.plane_dao.get_plane_by_plane_id(p_id)
+                if plane:
+                    if validate_defense(plane, validated_defense):
+                        validated_defense.append(plane)
+            if not len(validated_defense) == len(defense):
+                raise InvalidParameter("Defense contains overlapping planes!")
+            self.battle_dao.conclude_unchallenged_battles(user_id)
+            self.battle_dao.conclude_unstarted_battle()
             battle = Battle(None, None, user_id,
                             None, defense, sky_size, None, None, None, None, False, defense_size, None)
             return self.battle_dao.add_battle(battle, max_time)
@@ -123,9 +134,10 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
-            if messages["attack_messages"][-1] == "Battle won by last attack!":
+            if len(messages["attack_messages"]) > 2 and messages["attack_messages"][-1] == "Battle won by last attack!":
                 self.battle_dao.conclude_won_battle(battle_id, cr)
-            if messages["defense_messages"][-1] == "Battle won by last attack!":
+            if len(messages["defense_messages"]) > 2 and messages["defense_messages"][-1] == "Battle won by last " \
+                                                                                             "attack!":
                 self.battle_dao.conclude_won_battle(battle_id, cd)
             if len(cr_attacks) == len(cd_attacks) and in_time:
                 turn["turn"] = "This is your turn to attack."
@@ -165,9 +177,10 @@ class BattleService:
                 my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
             messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
-            if messages["attack_messages"][-1] == "Battle won by last attack!":
+            if len(messages["attack_messages"]) > 2 and messages["attack_messages"][-1] == "Battle won by last attack!":
                 self.battle_dao.conclude_won_battle(battle_id, cd)
-            if messages["defense_messages"][-1] == "Battle won by last attack!":
+            if len(messages["defense_messages"]) > 2 and messages["defense_messages"][-1] == "Battle won by last " \
+                                                                                             "attack!":
                 self.battle_dao.conclude_won_battle(battle_id, cr)
             if len(cr_attacks) == len(cd_attacks) + 1 and in_time:
                 turn["turn"] = "This is your turn to attack."
@@ -242,7 +255,7 @@ class BattleService:
                         and not check_progress(cd_attacks, cr_planes, cd_rnd_attacks):
                     self.battle_dao.conclude_unfinished_battle(battle_id, cr)
                     messages.append("Battle inconclusive by player disconnect.")
-                if messages[-1] == "Battle won by last attack!":
+                if len(messages) > 2 and messages[-1] == "Battle won by last attack!":
                     self.battle_dao.conclude_won_battle(battle_id, cr)
         else:
             if attack in cd_attacks and not len(cr_attacks) == len(cd_attacks):
@@ -265,7 +278,7 @@ class BattleService:
                     self.battle_dao.conclude_unfinished_battle(battle_id, cd)
                     messages.append("Battle inconclusive by player disconnect.")
 
-                if messages[-1] == "Battle won by last attack!":
+                if len(messages) > 2 and messages[-1] == "Battle won by last attack!":
                     self.battle_dao.conclude_won_battle(battle_id, cd)
         return messages
 
@@ -311,6 +324,7 @@ class BattleService:
         params = {"sky": None, "defense": None, "time": None}
         if validate_int(battle_id):
             pass
+        battle_id = int(battle_id)
         b = self.battle_dao.get_battle_by_id(battle_id)
         if not b.get_concluded():
             return "Unfinished battle"
@@ -367,7 +381,8 @@ class BattleService:
         if battle_result:
             winner = battle_result[0]
             disconnected = battle_result[1]
-        return {'messages': messages, 'data': data, 'params': params, 'winner': winner, 'disconnected': disconnected}
+        return {'messages': messages, 'data': data, 'params': params,
+                'winner': self.user_dao.get_user_by_id(winner).get_username(), 'disconnected': disconnected}
 
     def get_battle_history(self, user_id, battle_ids):
         battles = [self.battle_dao.get_battle_by_id(i) for i in battle_ids]
