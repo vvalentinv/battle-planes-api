@@ -389,15 +389,17 @@ class BattleService:
         battles_results = [self.battle_dao.get_battle_result(i) for i in battle_ids]
         i = 0
         data = []
-        while i < len(battles):
-            data.append({'id': battles[i].get_battle_id(),
+        while i < len(battles_results):
+            data.append({'id': battles_results[i][0],
                          'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
                          battles[i].get_challenged_id(),
                          'concluded-at': battles[i].get_battle_turn(),
-                         'winner': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
-                         if battles_results[i] is not None else 'Unavailable',
-                         'disconnected': self.user_dao.get_user_by_id(battles_results[i][0]).get_username()
-                         if battles_results[i] is not None else 'Unavailable'})
+                         'defense-size': battles[i].get_defense_size(),
+                         'sky-size': battles[i].get_sky_size(),
+                         'winner': self.user_dao.get_user_by_id(battles_results[i][1]).get_username()
+                         if battles_results[i][1] is not None else 'Unavailable',
+                         'disconnected': self.user_dao.get_user_by_id(battles_results[i][2]).get_username()
+                         if battles_results[i][2] is not None else 'Unavailable'})
             i += 1
         print(data)
         return data

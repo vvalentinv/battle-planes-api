@@ -274,7 +274,8 @@ class BattleDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT id FROM battles WHERE (challenger_id = %s OR challenged_id = %s) AND "
+                cur.execute("SELECT b.id FROM battles b JOIN battle_results br ON b.id = br.battle_id "
+                            "WHERE (challenger_id = %s OR challenged_id = %s) AND "
                             "coalesce(array_length(challenger_defense, 1), 0) = defense_size AND concluded = True",
                             (user_id, user_id))
                 b_id = cur.fetchone()
@@ -289,9 +290,9 @@ class BattleDao:
                               password=os.getenv("db_password"), host=os.getenv("db_host"),
                               port=os.getenv("db_port")) as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT winner, disconnected_user FROM battle_results WHERE battle_id = %s",
+                cur.execute("SELECT battle_id, winner, disconnected_user FROM battle_results WHERE battle_id = %s",
                             (battle_id,))
                 result = cur.fetchone()
                 if result:
-                    return result[0], result[1]
+                    return result[0], result[1], result[2]
                 return None
