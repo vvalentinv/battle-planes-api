@@ -322,6 +322,7 @@ class BattleService:
         messages = {"defense_messages": [], "attack_messages": []}
         data = {"my_attacks": [], "my_defense": [], "opponent_attacks": []}
         params = {"sky": None, "defense": None, "time": None}
+        opponent = None
         if validate_int(battle_id):
             pass
         battle_id = int(battle_id)
@@ -348,6 +349,7 @@ class BattleService:
                 data["my_defense"].append(p)
             data["my_attacks"] = cr_attacks
             data["opponent_attacks"] = cd_attacks
+            opponent = cd
             planes = []
             for plane_id in cd_defense:
                 planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
@@ -367,6 +369,7 @@ class BattleService:
                 data["my_defense"].append(p)
             data["my_attacks"] = cd_attacks
             data["opponent_attacks"] = cr_attacks
+            opponent = cr
             planes = []
             for plane_id in cr_defense:
                 planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
@@ -379,9 +382,10 @@ class BattleService:
         winner = None
         disconnected = None
         if battle_result:
-            winner = battle_result[0]
-            disconnected = battle_result[1]
+            winner = battle_result[1]
+            disconnected = battle_result[2]
         return {'messages': messages, 'data': data, 'params': params,
+                'opponent': self.user_dao.get_user_by_id(opponent).get_username(),
                 'winner': self.user_dao.get_user_by_id(winner).get_username(), 'disconnected': disconnected}
 
     def get_battle_history(self, user_id, battle_ids):
@@ -391,11 +395,12 @@ class BattleService:
         data = []
         while i < len(battles_results):
             data.append({'id': battles_results[i][0],
-                         'opponent': battles[i].get_challenger_id() if battles[i].get_challenged_id() == user_id else
-                         battles[i].get_challenged_id(),
-                         'concluded-at': battles[i].get_battle_turn(),
-                         'defense-size': battles[i].get_defense_size(),
-                         'sky-size': battles[i].get_sky_size(),
+                         'opponent': self.user_dao.get_user_by_id(battles[i].get_challenger_id()).get_username() if
+                         battles[i].get_challenged_id() == user_id else
+                         self.user_dao.get_user_by_id(battles[i].get_challenged_id()).get_username(),
+                         'concludedAt': battles[i].get_battle_turn(),
+                         'defenseSize': battles[i].get_defense_size(),
+                         'skySize': battles[i].get_sky_size(),
                          'winner': self.user_dao.get_user_by_id(battles_results[i][1]).get_username()
                          if battles_results[i][1] is not None else 'Unavailable',
                          'disconnected': self.user_dao.get_user_by_id(battles_results[i][2]).get_username()
