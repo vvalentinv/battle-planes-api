@@ -1,9 +1,6 @@
-import datetime
-
 from dotenv import load_dotenv
-import os
 from model.battle import Battle
-import psycopg2
+from utilities.db_pool_connection import pool
 
 load_dotenv()
 
@@ -11,9 +8,7 @@ load_dotenv()
 class BattleDao:
 
     def add_planes_to_battle_defense_by_username(self, battle_id, planes_array):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_defense=%s WHERE id=%s RETURNING *"
                             , (planes_array, battle_id))
@@ -33,9 +28,7 @@ class BattleDao:
                 return None
 
     def add_challenger_to_battle(self, user_id, battle_id, defense_size):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_id=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
@@ -46,9 +39,7 @@ class BattleDao:
                 return None
 
     def get_battle_by_id(self, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
                 b = cur.fetchone()
@@ -57,9 +48,7 @@ class BattleDao:
                 return None
 
     def add_battle(self, battle, max_time):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) "
@@ -71,9 +60,7 @@ class BattleDao:
                 return "db error", "db error"
 
     def is_engaged(self, user_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
@@ -88,9 +75,7 @@ class BattleDao:
                 return False
 
     def is_time_left(self, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT (SELECT battle_turn FROM battles WHERE id = %s) >= Now()", (battle_id,))
                 found = cur.fetchone()
@@ -98,9 +83,7 @@ class BattleDao:
                     return found[0]
 
     def is_concluded(self, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT concluded FROM battles WHERE id = %s", (battle_id,))
                 found = cur.fetchone()
@@ -108,9 +91,7 @@ class BattleDao:
                     return found[0]
 
     def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_attacks=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
@@ -121,9 +102,7 @@ class BattleDao:
                 return None
 
     def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenged_attacks=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
@@ -134,9 +113,7 @@ class BattleDao:
                 return None
 
     def conclude_unchallenged_battles(self, user_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True "
                             "WHERE challenged_id = %s AND challenger_id=0"
@@ -144,9 +121,7 @@ class BattleDao:
                 return True
 
     def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET rnd_attack_er=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
@@ -157,9 +132,7 @@ class BattleDao:
                 return None
 
     def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET rnd_attack_ed=%s, battle_turn = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
@@ -170,9 +143,7 @@ class BattleDao:
                 return None
 
     def conclude_unfinished_battle(self, battle_id, disconnected_user):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
                             "WHERE id = %s RETURNING *"
@@ -185,9 +156,7 @@ class BattleDao:
                         return True
 
     def conclude_unfinished_defense_battle(self, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
                             "WHERE id = %s"
@@ -195,9 +164,7 @@ class BattleDao:
                 return True
 
     def conclude_user_conceded_battles(self, user_id, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
                             "WHERE id = %s Returning *", (battle_id,))
@@ -213,10 +180,9 @@ class BattleDao:
                                 (battle_id, winner))
                     if cur.fetchone():
                         return battle, winner
+
     def conclude_unstarted_battle(self):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
                             "WHERE coalesce(array_length(challenger_defense, 1), 0) < defense_size "
@@ -225,9 +191,7 @@ class BattleDao:
                 return True
 
     def conclude_won_battle(self, battle_id, winner):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
                             "WHERE id = %s RETURNING *"
@@ -237,11 +201,8 @@ class BattleDao:
                                 (battle_id, winner))
                     return True
 
-
     def get_unchallenged_battles(self):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles "
                             "WHERE challenger_id = 0 AND battle_turn > Now() AND "
@@ -255,9 +216,7 @@ class BattleDao:
                 return battles
 
     def get_defense_setup_for_challenger(self, user_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles WHERE challenger_id = %s and "
                             "coalesce(array_length(challenger_defense, 1), 0) < defense_size and concluded = False",
@@ -270,9 +229,7 @@ class BattleDao:
                     return None
 
     def get_battle_id_list(self, user_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT b.id FROM battles b JOIN battle_results br ON b.id = br.battle_id "
                             "WHERE (challenger_id = %s OR challenged_id = %s) AND "
@@ -286,9 +243,7 @@ class BattleDao:
                 return result
 
     def get_battle_result(self, battle_id):
-        with psycopg2.connect(database=os.getenv("db_name"), user=os.getenv("db_user"),
-                              password=os.getenv("db_password"), host=os.getenv("db_host"),
-                              port=os.getenv("db_port")) as conn:
+        with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT battle_id, winner, disconnected_user FROM battle_results WHERE battle_id = %s",
                             (battle_id,))
