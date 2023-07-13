@@ -39,6 +39,7 @@ class BattleDao:
                 return None
 
     def get_battle_by_id(self, battle_id):
+        battle_id = int(battle_id)
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
@@ -90,7 +91,9 @@ class BattleDao:
                 if found:
                     return found[0]
 
-    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=0):
+        print(turn_time)
+
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_attacks=%s, battle_turn = Now() + '%s MINUTE' "
@@ -101,7 +104,7 @@ class BattleDao:
                     return True
                 return None
 
-    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=4):
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenged_attacks=%s, battle_turn = Now() + '%s MINUTE' "
@@ -155,7 +158,7 @@ class BattleDao:
                     if cur.fetchone():
                         return True
 
-    def conclude_unfinished_defense_battle(self, battle_id):
+    def conclude_unfinished_defense_setup_battle(self, battle_id):
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "

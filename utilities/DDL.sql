@@ -76,6 +76,7 @@ select * from users u ;
 select * from planes p ;
 select * from battles b ;
 delete from battles;
+select * from battle_results br ;
 
 Select id
 		FROM battles
