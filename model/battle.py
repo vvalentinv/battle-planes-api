@@ -4,7 +4,7 @@ import datetime
 class Battle:
     def __init__(self, battle_id, challenger_id,	challenged_id, challenger_defense, challenged_defense,
                  sky_size, challenger_attacks, challenged_attacks, rnd_attack_er, rnd_attack_ed, concluded,
-                 defense_size, battle_turn):
+                 defense_size, end_battle_turn_at, battle_turn_size):
         self.__battle_id = battle_id
         self.__challenger_id = challenger_id
         self.__challenged_id = challenged_id
@@ -17,7 +17,8 @@ class Battle:
         self.__rnd_attack_ed = rnd_attack_ed
         self.__concluded = concluded
         self.__defense_size = defense_size
-        self.__battle_turn = battle_turn
+        self.__end_battle_turn_at = end_battle_turn_at
+        self.__battle_turn_size = battle_turn_size
 
     def get_battle_id(self):
         return self.__battle_id
@@ -55,8 +56,11 @@ class Battle:
     def get_defense_size(self):
         return self.__defense_size
 
-    def get_battle_turn(self):
-        return self.__battle_turn
+    def get_end_battle_turn_at(self):
+        return self.__end_battle_turn_at
+
+    def get_battle_turn_size(self):
+        return self.__battle_turn_size
 
     def set_battle_id(self, value):
         self.__battle_id = value
@@ -94,11 +98,14 @@ class Battle:
     def set_defense_size(self, value):
         self.__defense_size = value
 
-    def set_battle_turn(self, value):
-        self.__battle_turn = value
+    def set_end_battle_turn_at(self, value):
+        self.__end_battle_turn_at = value
 
-    def check_battle_turn(self):
-        return self.get_battle_turn().timestamp() > datetime.datetime.now().timestamp()
+    def set_battle_turn_size(self, value):
+        self.__battle_turn_size = value
+
+    def check_end_battle_turn_at(self):
+        return self.get_end_battle_turn_at().timestamp() > datetime.datetime.now().timestamp()
 
     def to_dict(self):
         return {
@@ -114,7 +121,8 @@ class Battle:
             'rnd_attack_ed': self.get_rnd_attack_ed(),
             'concluded': self.get_concluded(),
             'defense_size': self.get_defense_size(),
-            'battle_turn': self.get_battle_turn()
+            'end_battle_turn_at': self.get_end_battle_turn_at(),
+            'battle_turn_size': self.get_battle_turn_size()
         }
 
     def __str__(self):
