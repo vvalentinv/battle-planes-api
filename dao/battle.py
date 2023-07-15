@@ -52,15 +52,16 @@ class BattleDao:
                                   b[12], b[13])
                 return None
 
-    def add_battle(self, battle, max_time):
-        print(type(max_time))
+    def add_battle(self, battle, max_time, turn_time):
+        max_time = str(max_time) + ' MINUTE'
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, "
-                    "end_battle_turn_at) "
-                    "VALUES	(0, %s, %s, False, Now() + '%s MINUTE') RETURNING *",
-                    (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
+                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, sky_size, concluded, "
+                    "defense_size, end_battle_turn_at, battle_turn_size) "
+                    "VALUES	(0, %s, %s, %s, False, %s, Now() + %s, %s) RETURNING *",
+                    (battle.get_challenged_id(), battle.get_challenged_defense(), battle.get_sky_size(),
+                     battle.get_defense_size(), max_time, turn_time))
                 b = cur.fetchone()
                 if b:
                     return b[0], b[12]

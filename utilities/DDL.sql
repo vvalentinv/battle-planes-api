@@ -30,19 +30,19 @@ CREATE TABLE planes(
 
 CREATE TABLE battles(
 	id SERIAL PRIMARY KEY,
-	challenger_id INT DEFAULT 0,
+	challenger_id INT NOT NULL,
 	challenged_id INT NOT NULL,
 	challenger_defense INT[],
 	challenged_defense INT[] NOT NULL,
-	sky_size INT DEFAULT 10,
+	sky_size INT NOT NULL,
 	challenger_attacks INT[],
 	challenged_attacks INT[],
 	rnd_attack_er INT[],
 	rnd_attack_ed INT[],
-	concluded BOOLEAN  NOT NULL DEFAULT False,
-	defense_size INT DEFAULT 3,
+	concluded BOOLEAN  NOT NULL,
+	defense_size INT NOT NULL,
 	end_battle_turn_at TIMESTAMPTZ NOT NULL,
-	battle_turn_size INT DEFAULT 3,
+	battle_turn_size INT NOT NULL,
 	CONSTRAINT fk_challenger_id
   		FOREIGN KEY (challenger_id) REFERENCES "users" (id),
   	CONSTRAINT fk_challenged_id
