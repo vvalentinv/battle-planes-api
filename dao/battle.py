@@ -7,30 +7,33 @@ load_dotenv()
 
 class BattleDao:
 
-    def add_planes_to_battle_defense_by_username(self, battle_id, planes_array):
+    def add_planes_to_battle_defense_by_username(self, battle_id, plane_ids_array):
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("UPDATE battles SET challenger_defense=%s WHERE id=%s RETURNING *"
-                            , (planes_array, battle_id))
+                            , (plane_ids_array, battle_id))
                 b = cur.fetchone()
                 if b:
-                    battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
+                    battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
+                                    b[12], b[13])
                     curr_def = battle.get_challenger_defense() or []
                     if battle.get_defense_size() == len(curr_def):
-                        cur.execute("UPDATE battles SET battle_turn = Now() + '%s MINUTE' "
+                        cur.execute("UPDATE battles SET end_battle_turn_at = Now() + '%s MINUTE' "
                                     " WHERE id=%s RETURNING *"
                                     , (battle.get_defense_size(), battle_id))
                     else:
-                        cur.execute("UPDATE battles SET battle_turn = Now() + '%s MINUTE'  WHERE id=%s RETURNING *"
-                                    , ((battle.get_defense_size() - len(curr_def)), battle_id))
+                        cur.execute("UPDATE battles SET end_battle_turn_at = Now() + '1 MINUTE'  WHERE id=%s "
+                                    "RETURNING *"
+                                    , (battle_id, ))
                     return f"{battle.get_defense_size() - len(curr_def)} more plane(s) to add " \
                            f"until defense setup is complete."
                 return None
 
     def add_challenger_to_battle(self, user_id, battle_id, defense_size):
+        print("defense_size", defense_size)
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_id=%s, battle_turn = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenger_id=%s, end_battle_turn_at = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
                             , (user_id, defense_size, battle_id))
                 inserted_user = cur.fetchone()
@@ -45,15 +48,18 @@ class BattleDao:
                 cur.execute("SELECT * FROM battles WHERE id = %s", (battle_id,))
                 b = cur.fetchone()
                 if b:
-                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11], b[12])
+                    return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
+                                  b[12], b[13])
                 return None
 
     def add_battle(self, battle, max_time):
+        print(type(max_time))
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, battle_turn) "
-                    "VALUES	(0, %s, %s, False, Now() + '%s MINUTE') returning *",
+                    "INSERT INTO battles (challenger_id, challenged_id, challenged_defense, concluded, "
+                    "end_battle_turn_at) "
+                    "VALUES	(0, %s, %s, False, Now() + '%s MINUTE') RETURNING *",
                     (battle.get_challenged_id(), battle.get_challenged_defense(), max_time))
                 b = cur.fetchone()
                 if b:
@@ -65,11 +71,11 @@ class BattleDao:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
-                            "AND Now() < battle_turn + '1 MINUTE' "
+                            "AND Now() < end_battle_turn_at "
                             "UNION "
                             "SELECT id FROM battles "
                             "WHERE concluded IS False AND challenged_id = %s AND "
-                            "challenger_id <> 0 AND Now() < battle_turn + '1 MINUTE'", (user_id, user_id))
+                            "challenger_id <> 0 AND Now() < end_battle_turn_at ", (user_id, user_id))
                 found = cur.fetchone()
                 if found:
                     return found[0]
@@ -78,7 +84,7 @@ class BattleDao:
     def is_time_left(self, battle_id):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("SELECT (SELECT battle_turn FROM battles WHERE id = %s) >= Now()", (battle_id,))
+                cur.execute("SELECT (SELECT end_battle_turn_at FROM battles WHERE id = %s) >= Now()", (battle_id,))
                 found = cur.fetchone()
                 if found:
                     return found[0]
@@ -91,12 +97,10 @@ class BattleDao:
                 if found:
                     return found[0]
 
-    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=0):
-        print(turn_time)
-
+    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_attacks=%s, battle_turn = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenger_attacks=%s, end_battle_turn_at = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -104,10 +108,10 @@ class BattleDao:
                     return True
                 return None
 
-    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=4):
+    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenged_attacks=%s, battle_turn = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenged_attacks=%s, end_battle_turn_at = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -126,7 +130,7 @@ class BattleDao:
     def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET rnd_attack_er=%s, battle_turn = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET rnd_attack_er=%s, end_battle_turn_at = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -137,7 +141,7 @@ class BattleDao:
     def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET rnd_attack_ed=%s, battle_turn = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET rnd_attack_ed=%s, end_battle_turn_at = Now() + '%s MINUTE' "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -148,7 +152,7 @@ class BattleDao:
     def conclude_unfinished_battle(self, battle_id, disconnected_user):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
+                cur.execute("UPDATE battles SET concluded = True, end_battle_turn_at = Now() "
                             "WHERE id = %s RETURNING *"
                             , (battle_id,))
                 b = cur.fetchone()
@@ -161,7 +165,7 @@ class BattleDao:
     def conclude_unfinished_defense_setup_battle(self, battle_id):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
+                cur.execute("UPDATE battles SET concluded = True, end_battle_turn_at = Now()::date "
                             "WHERE id = %s"
                             , (battle_id,))
                 return True
@@ -169,12 +173,12 @@ class BattleDao:
     def conclude_user_conceded_battles(self, user_id, battle_id):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
+                cur.execute("UPDATE battles SET concluded = True, end_battle_turn_at = Now() "
                             "WHERE id = %s Returning *", (battle_id,))
                 b = cur.fetchone()
                 if b:
                     battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
-                                    b[9], b[10], b[11], b[12])
+                                    b[9], b[10], b[11], b[12], b[13])
                     if battle.get_challenger_id() == user_id:
                         winner = battle.get_challenged_id()
                     else:
@@ -187,16 +191,16 @@ class BattleDao:
     def conclude_unstarted_battle(self):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now()::date "
+                cur.execute("UPDATE battles SET concluded = True, end_battle_turn_at = Now()::date "
                             "WHERE coalesce(array_length(challenger_defense, 1), 0) < defense_size "
-                            "AND battle_turn < Now() "
+                            "AND end_battle_turn_at < Now() "
                             )
                 return True
 
     def conclude_won_battle(self, battle_id, winner):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET concluded = True, battle_turn = Now() "
+                cur.execute("UPDATE battles SET concluded = True, end_battle_turn_at = Now() "
                             "WHERE id = %s RETURNING *"
                             , (battle_id,))
                 if cur.fetchone():
@@ -208,13 +212,13 @@ class BattleDao:
         with pool.connection() as conn:
             with conn.cursor() as cur:
                 cur.execute("SELECT * FROM battles "
-                            "WHERE challenger_id = 0 AND battle_turn > Now() AND "
+                            "WHERE challenger_id = 0 AND end_battle_turn_at > Now() AND "
                             "concluded = False", )
                 b = cur.fetchone()
                 battles = []
                 while b:
                     battles.append(Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
-                                          b[9], b[10], b[11], b[12]))
+                                          b[9], b[10], b[11], b[12], b[13]))
                     b = cur.fetchone()
                 return battles
 
@@ -227,7 +231,7 @@ class BattleDao:
                 b = cur.fetchone()
                 if b:
                     return Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
-                                  b[9], b[10], b[11], b[12])
+                                  b[9], b[10], b[11], b[12], b[13])
                 else:
                     return None
 
