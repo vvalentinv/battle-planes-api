@@ -17,10 +17,11 @@ class BattleDao:
                     battle = Battle(b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8], b[9], b[10], b[11],
                                     b[12], b[13])
                     curr_def = battle.get_challenger_defense() or []
+                    turn_time = str(battle.get_battle_turn_size()) + ' MINUTE'
                     if battle.get_defense_size() == len(curr_def):
-                        cur.execute("UPDATE battles SET end_battle_turn_at = Now() + '%s MINUTE' "
+                        cur.execute("UPDATE battles SET end_battle_turn_at = Now() + %s "
                                     " WHERE id=%s RETURNING *"
-                                    , (battle.get_defense_size(), battle_id))
+                                    , (turn_time, battle_id))
                     else:
                         cur.execute("UPDATE battles SET end_battle_turn_at = Now() + '1 MINUTE'  WHERE id=%s "
                                     "RETURNING *"
@@ -29,13 +30,12 @@ class BattleDao:
                            f"until defense setup is complete."
                 return None
 
-    def add_challenger_to_battle(self, user_id, battle_id, defense_size):
-        print("defense_size", defense_size)
+    def add_challenger_to_battle(self, user_id, battle_id):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_id=%s, end_battle_turn_at = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenger_id=%s, end_battle_turn_at = Now() + '1 MINUTE' "
                             "WHERE id=%s RETURNING *"
-                            , (user_id, defense_size, battle_id))
+                            , (user_id, battle_id))
                 inserted_user = cur.fetchone()
                 if inserted_user:
                     return "Challenge accepted!"
