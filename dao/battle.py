@@ -72,11 +72,12 @@ class BattleDao:
             with conn.cursor() as cur:
                 cur.execute("SELECT id FROM battles "
                             "WHERE concluded IS False AND challenger_id = %s "
-                            "AND Now() < end_battle_turn_at "
+                            # "AND Now() < end_battle_turn_at "
                             "UNION "
                             "SELECT id FROM battles "
-                            "WHERE concluded IS False AND challenged_id = %s AND "
-                            "challenger_id <> 0 AND Now() < end_battle_turn_at ", (user_id, user_id))
+                            "WHERE concluded IS False AND challenged_id = %s "
+                            # "AND challenger_id <> 0 AND Now() < end_battle_turn_at "
+                            , (user_id, user_id))
                 found = cur.fetchone()
                 if found:
                     return found[0]
