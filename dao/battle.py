@@ -99,10 +99,10 @@ class BattleDao:
                 if found:
                     return found[0]
 
-    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_challenger_attacks_to_battle(self, battle_id, attacks, turn_time='3 MINUTE'):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenger_attacks=%s, end_battle_turn_at = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenger_attacks=%s, end_battle_turn_at = Now() + %s "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -110,10 +110,10 @@ class BattleDao:
                     return True
                 return None
 
-    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_challenged_attacks_to_battle(self, battle_id, attacks, turn_time='3 MINUTE'):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET challenged_attacks=%s, end_battle_turn_at = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET challenged_attacks=%s, end_battle_turn_at = Now() + %s "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -129,10 +129,10 @@ class BattleDao:
                             , (user_id,))
                 return True
 
-    def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_random_challenger_attacks_to_battle(self, battle_id, attacks, turn_time='3 MINUTE'):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET rnd_attack_er=%s, end_battle_turn_at = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET rnd_attack_er=%s, end_battle_turn_at = Now() + %s "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
@@ -140,10 +140,10 @@ class BattleDao:
                     return True
                 return None
 
-    def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time=3):
+    def add_random_challenged_attacks_to_battle(self, battle_id, attacks, turn_time='3 MINUTE'):
         with pool.connection() as conn:
             with conn.cursor() as cur:
-                cur.execute("UPDATE battles SET rnd_attack_ed=%s, end_battle_turn_at = Now() + '%s MINUTE' "
+                cur.execute("UPDATE battles SET rnd_attack_ed=%s, end_battle_turn_at = Now() + %s "
                             "WHERE id=%s RETURNING *"
                             , (attacks, turn_time, battle_id))
                 inserted_user = cur.fetchone()
