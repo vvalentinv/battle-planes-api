@@ -60,7 +60,7 @@ class BattleService:
             elif self.battle_dao.is_concluded(battle_id):
                 raise InvalidParameter("This battle was concluded")
             elif battle.get_challenger_id() == 0 and self.battle_dao.is_time_left(battle_id):
-                return self.battle_dao.add_challenger_to_battle(user_id, battle_id, battle.get_defense_size())
+                return self.battle_dao.add_challenger_to_battle(user_id, battle_id)
             raise InvalidParameter("Timeframe for challenge just elapsed")
 
     def add_battle(self, user_id, defense, defense_size, sky_size, max_time, turn_time):
