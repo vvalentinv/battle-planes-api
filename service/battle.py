@@ -212,13 +212,12 @@ class BattleService:
         cd_rnd_attacks = b.get_rnd_attack_ed() or []
         cr_defense = b.get_challenger_defense()
         cd_defense = b.get_challenged_defense()
+        sky_size = b.get_sky_size()
         b.get_defense_size()
-        cr_planes = []
-        for plane_id in cd_defense:
-            cr_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-        cd_planes = []
-        for plane_id in cr_defense:
-            cd_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+        cr_planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cr_defense]
+        cd_planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cd_defense]
+        turn_size = str(b.get_battle_turn_size()) + ' MINUTE'
+        in_time = b.check_end_battle_turn_at()
         # Perform attack, evaluate params and determine attack, store attack
         if cr == user_id:
             # check if it"s challenger"s turn (attack fields have same lengths
@@ -337,12 +336,8 @@ class BattleService:
             data["my_attacks"] = cr_attacks
             data["opponent_attacks"] = cd_attacks
             opponent = cd
-            planes = []
-            for plane_id in cd_defense:
-                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-            my_planes = []
-            for plane_id in cr_defense:
-                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cd_defense]
+            my_planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cr_defense]
             messages["attack_messages"] = evaluate_attack(cr_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cd_attacks, my_planes)
         elif user_id == cd:
@@ -357,12 +352,8 @@ class BattleService:
             data["my_attacks"] = cd_attacks
             data["opponent_attacks"] = cr_attacks
             opponent = cr
-            planes = []
-            for plane_id in cr_defense:
-                planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
-            my_planes = []
-            for plane_id in cd_defense:
-                my_planes.append(self.plane_dao.get_plane_by_plane_id(plane_id))
+            planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cr_defense]
+            my_planes = [self.plane_dao.get_plane_by_plane_id(i) for i in cd_defense]
             messages["attack_messages"] = evaluate_attack(cd_attacks, planes)
             messages["defense_messages"] = evaluate_attack(cr_attacks, my_planes)
         battle_result = self.battle_dao.get_battle_result(battle_id)
@@ -393,5 +384,5 @@ class BattleService:
                          'disconnected': self.user_dao.get_user_by_id(battles_results[i][2]).get_username()
                          if battles_results[i][2] is not None else 'Unavailable'})
             i += 1
-        print(data)
+
         return data
