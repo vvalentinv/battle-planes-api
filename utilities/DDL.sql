@@ -30,18 +30,19 @@ CREATE TABLE planes(
 
 CREATE TABLE battles(
 	id SERIAL PRIMARY KEY,
-	challenger_id INT DEFAULT 0,
+	challenger_id INT NOT NULL,
 	challenged_id INT NOT NULL,
 	challenger_defense INT[],
 	challenged_defense INT[] NOT NULL,
-	sky_size INT DEFAULT 10,
+	sky_size INT NOT NULL,
 	challenger_attacks INT[],
 	challenged_attacks INT[],
 	rnd_attack_er INT[],
 	rnd_attack_ed INT[],
-	concluded BOOLEAN  NOT NULL DEFAULT False,
-	defense_size INT DEFAULT 3,
-	battle_turn TIMESTAMPTZ,
+	concluded BOOLEAN  NOT NULL,
+	defense_size INT NOT NULL,
+	end_battle_turn_at TIMESTAMPTZ NOT NULL,
+	battle_turn_size INT NOT NULL,
 	CONSTRAINT fk_challenger_id
   		FOREIGN KEY (challenger_id) REFERENCES "users" (id),
   	CONSTRAINT fk_challenged_id
@@ -62,8 +63,8 @@ INSERT INTO users (id, username, pass, email) VALUES (0, 'default-challenger', '
 INSERT INTO flight_directions VALUES (1, 'North'), (2, 'East'), (3, 'South'), (4, 'West');
 
 INSERT INTO battles (challenger_id, challenged_id, challenger_defense, challenged_defense, challenger_attacks, challenged_attacks, rnd_attack_ed, concluded, battle_turn) VALUES 
-					(2, 1, array[1,2,3], array[1,2,3], array[0, 9, 90, 99], array[0, 9, 90, 99], array[0, 9, 90, 99], False, Now() + interval '3 MINUTE');
-update battles set concluded  = true  WHERE id = 139 RETURNING *;
+					(0, 2, array[1,2,3], array[1,2,3], array[0, 9, 90, 99], array[0, 9, 90, 99], array[0, 9, 90, 99], False, Now() + '7 MINUTE');
+update battles set concluded  = true  WHERE id = 187 RETURNING *;
 SELECT (SELECT username FROM users WHERE username='jcad1') = 'jcad1';
 select (Select battle_turn from battles b Where id = 185) > Now();
 select * from planes where id IN(125,88);
@@ -76,6 +77,7 @@ select * from users u ;
 select * from planes p ;
 select * from battles b ;
 delete from battles;
+select * from battle_results br ;
 
 Select id
 		FROM battles

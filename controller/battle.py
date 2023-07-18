@@ -33,12 +33,13 @@ def add_battle():
         r_body = request.get_json()
         try:
             max_time = r_body.get('max-time', None)
+            turn_time = r_body.get('turn-time', None)
             defense = r_body.get('defense', None)
             defense_size = r_body.get('defense-size', None)
             sky_size = r_body.get('sky-size', None)
-            if defense and defense_size and sky_size and max_time:
+            if defense and defense_size and sky_size and max_time and turn_time:
                 opened_challenge = battle_service.add_battle(req_id.get("user_id"), defense,
-                                                             defense_size, sky_size, max_time)
+                                                             defense_size, sky_size, max_time, turn_time)
                 return {"timeStamp": opened_challenge[1], "battleId": opened_challenge[0]}, 201
             else:
                 return {"message": "All parameters are required."}, 400
@@ -130,7 +131,7 @@ def get_unchallenged_battles_or_battle_status():
                     opponent_id = b.get_challenger_id()
 
             if battle_id and defeat_status == 'False' and query_battle_id:
-                return {"status": battle_service.get_status(user_id, battle_id, defeat_status),
+                return {"status": battle_service.get_status(user_id, battle_id),
                         "user": get_jwt_identity().get('username'),
                         "battleID": battle_id,
                         "opponent": user_service.user_dao.get_user_by_id(opponent_id).get_username()}, 200
