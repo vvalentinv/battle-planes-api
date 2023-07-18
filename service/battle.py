@@ -233,9 +233,10 @@ class BattleService:
                     self.battle_dao.add_random_challenger_attacks_to_battle(battle_id, cr_rnd_attacks, turn_size)
                 cr_attacks.append(attack)
                 self.battle_dao.add_challenger_attacks_to_battle(battle_id, cr_attacks, turn_size)
+
+                messages = evaluate_attack(cr_attacks, cd_planes)
                 # Next var determines if a battle is finished playing against random attacks or inconclusive by
                 # disconnection
-                messages = evaluate_attack(cr_attacks, cd_planes)
                 check_overall_progress = check_progress(cr_attacks, cd_planes, cr_rnd_attacks)
                 if evaluate_disconnect(cr_attacks, cr_rnd_attacks, check_overall_progress) \
                         and not check_progress(cd_attacks, cr_planes, cd_rnd_attacks):
