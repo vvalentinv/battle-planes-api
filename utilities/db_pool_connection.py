@@ -12,9 +12,9 @@ port = os.getenv("db_port")
 
 pool = ConnectionPool(
     'postgresql://' +
-    user + ':'
-    + password + '@' +
-    host + ':' +
-    port + '/' +
-    database
+    str(user) + ':'
+    + str(password) + '@' +
+    str(host) + ':' +
+    str(port) + '/' +
+    str(database)
 )
